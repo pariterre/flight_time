@@ -1,90 +1,110 @@
 import 'dart:math';
 
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-Size _computeSize(context,
-    {required Size videoSize, required double videoAspectRatio}) {
-  final width = videoSize.width;
-  final height = videoSize.height;
-
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
-
-  final widthSizeFactor = width / screenWidth;
-  final heightSizeFactor = height / screenHeight;
-
-  final sizeFactor =
-      widthSizeFactor > heightSizeFactor ? widthSizeFactor : heightSizeFactor;
-
-  return Size(videoSize.width / sizeFactor,
-      videoSize.height * videoAspectRatio / sizeFactor);
-}
-
-class ScaffoldVideoPlayback extends StatelessWidget {
+class ScaffoldVideoPlayback extends StatefulWidget {
   const ScaffoldVideoPlayback({super.key, required this.controller});
 
   final VideoPlayerController controller;
 
+  @override
+  State<ScaffoldVideoPlayback> createState() => _ScaffoldVideoPlaybackState();
+}
+
+class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
+  bool _canPop = false;
+
   void _onUpdateTimeline(double value) {
-    final duration = controller.value.duration;
+    final duration = widget.controller.value.duration;
     final position = duration * value;
-    controller.seekTo(position);
+    widget.controller.seekTo(position);
   }
 
   void _onPlay() {
-    controller.play();
+    widget.controller.play();
   }
 
   void _onPause() {
-    controller.pause();
+    widget.controller.pause();
+  }
+
+  void _areYouSureDialog(context) async {
+    _canPop = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Êtes-vous sûr de vouloir quitter ?'),
+        content: const Text('Vous perdrez votre progression.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Quitter'),
+          ),
+        ],
+      ),
+    );
+
+    if (_canPop) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final videoSize = _computeSize(context,
-        videoSize:
-            Size(controller.value.size.width, controller.value.size.height),
-        videoAspectRatio: controller.value.aspectRatio);
+    final videoSize = computeSize(context,
+        videoSize: Size(widget.controller.value.size.width,
+            widget.controller.value.size.height),
+        videoAspectRatio: widget.controller.value.aspectRatio);
 
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Visonnement de l\'essai'),
-          elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: () {
-                debugPrint('do something with the file');
-              },
-            )
-          ],
-        ),
-        bottomNavigationBar: Container(
-          color: Theme.of(context).appBarTheme.backgroundColor,
-          width: double.infinity,
-          height: 75,
-          child: _VideoPlaybackSlider(controller,
-              onUpdateTimeline: _onUpdateTimeline,
-              onPlay: _onPlay,
-              onPause: _onPause),
-        ),
-        body: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.black,
-            ),
-            Center(
-              child: SizedBox(
-                  width: videoSize.width,
-                  height: videoSize.height,
-                  child: Transform.rotate(
-                      angle: pi / 2, child: VideoPlayer(controller))),
-            ),
-          ],
-        ));
+    return PopScope(
+      canPop: _canPop,
+      child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Visonnement de l\'essai'),
+            elevation: 0,
+            leading: IconButton(
+                onPressed: () => _areYouSureDialog(context),
+                icon: Icon(Icons.arrow_back)),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.check),
+                onPressed: () {
+                  debugPrint('do something with the file');
+                },
+              )
+            ],
+          ),
+          bottomNavigationBar: Container(
+            color: Theme.of(context).appBarTheme.backgroundColor,
+            width: double.infinity,
+            height: 75,
+            child: _VideoPlaybackSlider(widget.controller,
+                onUpdateTimeline: _onUpdateTimeline,
+                onPlay: _onPlay,
+                onPause: _onPause),
+          ),
+          body: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black,
+              ),
+              Center(
+                child: SizedBox(
+                    width: videoSize.width,
+                    height: videoSize.height,
+                    child: Transform.rotate(
+                        angle: pi / 2, child: VideoPlayer(widget.controller))),
+              ),
+            ],
+          )),
+    );
   }
 }
 

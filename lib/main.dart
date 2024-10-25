@@ -1,3 +1,4 @@
+import 'package:flight_time/screens/playback_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flight_time/screens/camera_page.dart';
 
@@ -16,7 +17,11 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.teal,
           appBarTheme:
               AppBarTheme(color: Colors.teal, foregroundColor: Colors.white)),
-      home: CameraPage(),
+      initialRoute: CameraPage.routeName,
+      routes: {
+        CameraPage.routeName: (context) => const CameraPage(),
+        PlaybackPage.routeName: (context) => const PlaybackPage(),
+      },
     );
   }
 }
