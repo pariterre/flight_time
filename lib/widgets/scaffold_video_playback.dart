@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/helpers.dart';
+import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -16,6 +17,10 @@ class ScaffoldVideoPlayback extends StatefulWidget {
 
 class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
   bool _canPop = false;
+
+  void _onSaveVideo() {
+    showDialog(context: context, builder: (context) => SaveTrialDialog());
+  }
 
   void _onUpdateTimeline(double value) {
     final duration = widget.controller.value.duration;
@@ -74,9 +79,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.check),
-                onPressed: () {
-                  // TODO: Implement the logic to save the video
-                },
+                onPressed: _onSaveVideo,
               )
             ],
           ),

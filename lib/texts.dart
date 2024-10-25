@@ -44,6 +44,8 @@ class Texts {
       : 'Vous perdrez votre progression.';
 
   // The texts for the buttons
+  String get confirm => language == Language.en ? 'Confirm' : 'Confirmer';
+
   String get cancel => language == Language.en ? 'Cancel' : 'Annuler';
 
   String get quit => language == Language.en ? 'Quit' : 'Quitter';
