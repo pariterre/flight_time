@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -34,16 +35,16 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
     _canPop = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Êtes-vous sûr de vouloir quitter ?'),
-        content: const Text('Vous perdrez votre progression.'),
+        title: Text(Texts.instance.areYouSureToQuit),
+        content: Text(Texts.instance.youWillLoseYourProgress),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+            child: Text(Texts.instance.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Quitter'),
+            child: Text(Texts.instance.quit),
           ),
         ],
       ),
@@ -65,7 +66,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
       canPop: _canPop,
       child: Scaffold(
           appBar: AppBar(
-            title: const Text('Visonnement de l\'essai'),
+            title: Text(Texts.instance.visualizingVideo),
             elevation: 0,
             leading: IconButton(
                 onPressed: () => _areYouSureDialog(context),
@@ -74,7 +75,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
               IconButton(
                 icon: const Icon(Icons.check),
                 onPressed: () {
-                  debugPrint('do something with the file');
+                  // TODO: Implement the logic to save the video
                 },
               )
             ],

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/scaffold_video_playback.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -43,9 +44,7 @@ class _PlaybackPageState extends State<PlaybackPage> {
     return _isReady
         ? ScaffoldVideoPlayback(controller: _videoPlayerController)
         : Scaffold(
-            appBar: AppBar(
-              title: const Text('Préparation de l\'essai'),
-            ),
+            appBar: AppBar(title: Text(Texts.instance.preparingTrial)),
             body: Container(
               color: Colors.black,
               child: const Center(

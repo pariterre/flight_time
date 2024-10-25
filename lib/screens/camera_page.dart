@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flight_time/screens/playback_page.dart';
+import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
@@ -67,9 +68,7 @@ class _CameraPageState extends State<CameraPage> {
           videoAspectRatio: _cameraController.value.aspectRatio);
 
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Enregistrement vidéo'),
-        ),
+        appBar: AppBar(title: Text(Texts.instance.recordingVideo)),
         bottomNavigationBar: Container(
           color: Theme.of(context).appBarTheme.backgroundColor,
           width: double.infinity,
