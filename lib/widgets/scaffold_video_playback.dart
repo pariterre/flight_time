@@ -17,19 +17,28 @@ class ScaffoldVideoPlayback extends StatefulWidget {
 
 class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
   bool _canPop = false;
+  bool _canSave = false;
 
-  void _onSaveVideo() {
-    showDialog(context: context, builder: (context) => SaveTrialDialog());
+  Future<void> _onSaveVideo() async {
+    final response = await showDialog(
+        context: context, builder: (context) => SaveTrialDialog());
+    if (response == null) return;
+
+    debugPrint(
+        'Saving trial with athlete: ${response['athlete']} and trial: ${response['trial']}');
   }
 
   void _onUpdateTimeline(double value) {
     final duration = widget.controller.value.duration;
     final position = duration * value;
     widget.controller.seekTo(position);
+    _canSave = true;
+    setState(() {});
   }
 
   void _onPlay() {
     widget.controller.play();
+    setState(() {});
   }
 
   void _onPause() {
@@ -78,15 +87,15 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 icon: Icon(Icons.arrow_back)),
             actions: [
               IconButton(
-                icon: const Icon(Icons.check),
-                onPressed: _onSaveVideo,
+                icon: const Icon(Icons.save),
+                onPressed: _canSave ? _onSaveVideo : null,
               )
             ],
           ),
           bottomNavigationBar: Container(
             color: Theme.of(context).appBarTheme.backgroundColor,
             width: double.infinity,
-            height: 75,
+            height: 150,
             child: _VideoPlaybackSlider(widget.controller,
                 onUpdateTimeline: _onUpdateTimeline,
                 onPlay: _onPlay,
@@ -131,76 +140,154 @@ class _VideoPlaybackSlider extends StatefulWidget {
 
 class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
   bool _focusOnFirst = true;
-  late bool _isPlaying = widget.controller.value.isPlaying;
-  var _timelineValues = RangeValues(0.0, 1.0);
+  var _ranges = RangeValues(0.0, 1.0);
+  var _playbackMarker = 0.0;
 
   void _onUpdateTimeline(RangeValues values) {
-    _focusOnFirst = _timelineValues.start != values.start;
+    _focusOnFirst = _ranges.start != values.start;
     widget.onUpdateTimeline(_focusOnFirst ? values.start : values.end);
-    _timelineValues = values;
+    _ranges = values;
     setState(() {});
   }
 
   @override
   void initState() {
-    widget.controller.addListener(_updateRangesFromPlaying);
+    widget.controller.addListener(_updatePlaybackMarkerFromPlaying);
     super.initState();
   }
 
-  void _updateRangesFromPlaying() {
-    _isPlaying = widget.controller.value.isPlaying;
+  @override
+  void dispose() {
+    widget.controller.removeListener(_updatePlaybackMarkerFromPlaying);
+    super.dispose();
+  }
 
+  double _getCurrentPlayingValue() {
     final duration = widget.controller.value.duration;
     final position = widget.controller.value.position;
-    final newValue = position.inMilliseconds / duration.inMilliseconds;
+    return position.inMilliseconds / duration.inMilliseconds;
+  }
 
-    // Make sure the limit cases actually works (the new value is not out of bounds)
-    if (newValue < _timelineValues.start) {
-      _focusOnFirst = true;
-    } else if (newValue > _timelineValues.end) {
-      _focusOnFirst = false;
-    }
-
-    if (_focusOnFirst) {
-      _timelineValues = RangeValues(newValue, _timelineValues.end);
-    } else {
-      _timelineValues = RangeValues(_timelineValues.start, newValue);
-    }
+  void _setPlayingValue(double value) {
+    final duration = widget.controller.value.duration;
+    final position =
+        Duration(milliseconds: (value * duration.inMilliseconds).toInt());
+    widget.controller.seekTo(position);
+    _playbackMarker = value;
     setState(() {});
+  }
+
+  void _updatePlaybackMarkerFromPlaying() {
+    if (widget.controller.value.isPlaying) {
+      _playbackMarker = _getCurrentPlayingValue();
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    const padding = 10.0;
+    final currentPlayingValue = _getCurrentPlayingValue();
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: padding),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context)
-                    .appBarTheme
-                    .foregroundColor!
-                    .withOpacity(0.6),
+          Column(
+            children: [
+              RangeSlider(
+                values: _ranges,
+                onChanged: _onUpdateTimeline,
               ),
-              child: _isPlaying
-                  ? IconButton(
-                      icon: const Icon(Icons.pause),
-                      onPressed: widget.onPause,
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.play_arrow),
-                      onPressed: widget.onPlay,
-                    )),
-          Expanded(
-            child: RangeSlider(
-              values: _timelineValues,
-              onChanged: _onUpdateTimeline,
-            ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _MarkerButton(
+                    onTap: _playbackMarker < _ranges.end
+                        ? () => _onUpdateTimeline(
+                            RangeValues(_playbackMarker, _ranges.end))
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  _PlayButton(
+                      isPlaying: widget.controller.value.isPlaying,
+                      onPause: widget.onPause,
+                      onPlay: widget.onPlay),
+                  const SizedBox(width: 12),
+                  _MarkerButton(
+                    onTap: _playbackMarker > _ranges.start
+                        ? () => _onUpdateTimeline(
+                            RangeValues(_ranges.start, _playbackMarker))
+                        : null,
+                  ),
+                ],
+              ),
+              Slider(
+                value: _playbackMarker,
+                onChanged: (value) {
+                  _setPlayingValue(value);
+                },
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PlayButton extends StatelessWidget {
+  const _PlayButton(
+      {required this.isPlaying, required this.onPause, required this.onPlay});
+
+  final bool isPlaying;
+  final Function() onPause;
+  final Function() onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color:
+              Theme.of(context).appBarTheme.foregroundColor!.withOpacity(0.6),
+        ),
+        child: isPlaying
+            ? IconButton(
+                icon: const Icon(Icons.pause),
+                onPressed: onPause,
+              )
+            : IconButton(
+                icon: const Icon(Icons.play_arrow),
+                onPressed: onPlay,
+              ));
+  }
+}
+
+class _MarkerButton extends StatelessWidget {
+  const _MarkerButton({required this.onTap});
+
+  final Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: onTap == null
+                ? Colors.black.withOpacity(0.2)
+                : Theme.of(context)
+                    .appBarTheme
+                    .foregroundColor!
+                    .withOpacity(0.6),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text('|'),
+          )),
     );
   }
 }

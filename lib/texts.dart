@@ -30,10 +30,6 @@ class Texts {
   String get trialName =>
       language == Language.en ? 'Trial name' : 'Nom de l\'essai';
 
-  String get doYouWantToSaveThisTrial => language == Language.en
-      ? 'Do you want to save this trial?'
-      : 'Voulez-vous sauvegarder cet essai?';
-
   // Misc texts
   String get areYouSureToQuit => language == Language.en
       ? 'Are you sure to quit?'
