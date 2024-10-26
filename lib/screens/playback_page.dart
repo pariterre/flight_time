@@ -16,6 +16,7 @@ class PlaybackPage extends StatefulWidget {
 
 class _PlaybackPageState extends State<PlaybackPage> {
   bool _isReady = false;
+  late final String _filePath;
   late VideoPlayerController _videoPlayerController;
 
   @override
@@ -31,9 +32,9 @@ class _PlaybackPageState extends State<PlaybackPage> {
   }
 
   Future<void> _initVideoPlayer() async {
-    final filePath = (ModalRoute.of(context)!.settings.arguments
-        as Map)['file_path'] as String;
-    _videoPlayerController = VideoPlayerController.file(File(filePath));
+    _filePath = (ModalRoute.of(context)!.settings.arguments as Map)['file_path']
+        as String;
+    _videoPlayerController = VideoPlayerController.file(File(_filePath));
     await _videoPlayerController.initialize();
     _isReady = true;
     setState(() {});
@@ -42,7 +43,8 @@ class _PlaybackPageState extends State<PlaybackPage> {
   @override
   Widget build(BuildContext context) {
     return _isReady
-        ? ScaffoldVideoPlayback(controller: _videoPlayerController)
+        ? ScaffoldVideoPlayback(
+            controller: _videoPlayerController, filePath: _filePath)
         : Scaffold(
             appBar: AppBar(title: Text(Texts.instance.preparingTrial)),
             body: Container(

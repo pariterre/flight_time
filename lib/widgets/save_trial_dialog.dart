@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 String _lastAthlete = '';
 
@@ -13,7 +16,7 @@ class SaveTrialDialog extends StatefulWidget {
 }
 
 class _SaveTrialDialogState extends State<SaveTrialDialog> {
-  bool _canSave = false;
+  late bool _canSave = true;
 
   final _nameFocusNode = FocusNode();
   final _athleteController = TextEditingController(text: _lastAthlete);
@@ -42,13 +45,21 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
       }
     });
 
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateCanSave());
     super.initState();
   }
 
-  void _updateCanSave() {
+  void _updateCanSave() async {
     _canSave = _athleteController.text.isNotEmpty &&
         _trialNameController.text.isNotEmpty;
-    setState(() {});
+    if (_canSave) {
+      final appFolder = (await getApplicationDocumentsDirectory()).path;
+      _canSave = !(await File(
+              '$appFolder/${_athleteController.text}/${_trialNameController.text}.mp4')
+          .exists());
+    }
+
+    if (mounted) setState(() {});
   }
 
   // The save trial dialog is in two parts. The first part is the name of the athlete that can be
@@ -139,16 +150,16 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop<String?>(),
           child: Text(Texts.instance.cancel),
         ),
         TextButton(
             onPressed: _canSave
                 ? () {
                     _lastAthlete = _athleteController.text;
-                    Navigator.of(context).pop({
+                    Navigator.of(context).pop(<String, String>{
                       'athlete': _athleteController.text,
-                      'trial': '${_trialNameController.text}.mp4'
+                      'trial': _trialNameController.text,
                     });
                   }
                 : null,

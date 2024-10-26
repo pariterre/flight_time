@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
@@ -22,9 +24,21 @@ class Athletes {
     Athletes._instance = Athletes._();
     Athletes._instance!._initializeDataBase();
 
+    await _deleteCacheFolder();
+
     while (!Athletes._instance!.isReady) {
       // wait for the database to be ready
       await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  ///
+  /// Delete the cache folder where the videos are stored
+  static Future<void> _deleteCacheFolder() async {
+    final cacheFolder = (await getApplicationCacheDirectory()).path;
+    final cacheDir = Directory(cacheFolder);
+    if (await cacheDir.exists()) {
+      await cacheDir.delete(recursive: true);
     }
   }
 
