@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/helpers.dart';
@@ -126,8 +127,9 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
         JsonEncoder.withIndent('  ').convert(_metaData!.toJson()),
         flush: true);
     if (_isFileNew) {
-      // If the file is new, move it to the correct folder
+      // If the file is new, move it to the correct folder and add it to the database
       await File(widget.filePath).rename(_metaData!.videoPath);
+      Athletes.instance.addVideo(_metaData!);
     }
   }
 

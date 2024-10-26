@@ -8,6 +8,7 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_linux/path_provider_linux.dart';
@@ -22,6 +23,20 @@ Future<Athletes> getDatabase() async {
   await AthletesMock.initialize();
   await Athletes.instance.reset();
   return Athletes.instance;
+}
+
+VideoMetaData dummyVideoMetaData(String athleteName,
+    {required String trialName}) {
+  return VideoMetaData(
+    athleteName: athleteName,
+    trialName: trialName,
+    baseFolder: Directory('my_folder'),
+    duration: Duration.zero,
+    creationDate: DateTime(0),
+    lastModified: DateTime(0),
+    frameJumpStarts: -1,
+    frameJumpEnds: -1,
+  );
 }
 
 void main() {
@@ -48,10 +63,12 @@ void main() {
     expect(athletes.athleteNames.length, 1);
 
     // Add videos to the athlete
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video2.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video2'));
     final athlete = athletes.athleteFromName('John Doe');
-    expect(athlete.videoPaths.length, 2);
+    expect(athlete.videoMetaDataPaths.length, 2);
 
     // Reset the database
     await athletes.reset();
@@ -60,7 +77,7 @@ void main() {
     // Adding back the athlete should not have any videos
     await athletes.addAthlete('John Doe');
     final athlete2 = athletes.athleteFromName('John Doe');
-    expect(athlete2.videoPaths.length, 0);
+    expect(athlete2.videoMetaDataPaths.length, 0);
   });
 
   test('Add an athlete to the database', () async {
@@ -75,7 +92,7 @@ void main() {
     await athletes.addAthlete('John Doe');
     final athlete = athletes.athleteFromName('John Doe');
     expect(athlete.name, 'John Doe');
-    expect(athlete.videoPaths.length, 0);
+    expect(athlete.videoMetaDataPaths.length, 0);
   });
 
   test('Get a non-existing athlete from the database', () async {
@@ -86,39 +103,43 @@ void main() {
   test('Add a video to an athlete', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
 
     final athlete = athletes.athleteFromName('John Doe');
-    expect(athlete.videoPaths.length, 1);
-    expect(athlete.videoPaths[0], 'my_folder/my_video.mp4');
+    expect(athlete.videoMetaDataPaths.length, 1);
+    expect(athlete.videoMetaDataPaths[0], 'my_folder/my_video.meta');
   });
 
   test('Add more than one video', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video2.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video2'));
 
     final athlete = athletes.athleteFromName('John Doe');
-    expect(athlete.videoPaths.length, 2);
-    expect(athlete.videoPaths[1], 'my_folder/my_video2.mp4');
+    expect(athlete.videoMetaDataPaths.length, 2);
+    expect(athlete.videoMetaDataPaths[1], 'my_folder/my_video2.meta');
   });
 
   test('Add a video that already exists', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
     expect(
-        () =>
-            athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4'),
+        () => athletes
+            .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video')),
         throwsStateError);
   });
 
   test('Add a video to a non-existing athlete', () async {
     final athletes = await getDatabase();
     expect(
-        () =>
-            athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4'),
+        () => athletes
+            .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video')),
         throwsStateError);
   });
 
@@ -126,11 +147,12 @@ void main() {
       () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
 
     final athlete = athletes.athleteFromName('John Doe');
     expect(
-      () => athlete.videoPaths[0] = 'my_folder/my_video3.mp4',
+      () => athlete.videoMetaDataPaths[0] = 'my_video3',
       throwsUnsupportedError,
     );
   });
@@ -138,30 +160,33 @@ void main() {
   test('Remove a video from an athlete', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video2.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video2'));
 
-    await athletes.removeVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
+    await athletes
+        .removeVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
 
     final athlete = athletes.athleteFromName('John Doe');
-    expect(athlete.videoPaths.length, 1);
-    expect(athlete.videoPaths[0], 'my_folder/my_video2.mp4');
+    expect(athlete.videoMetaDataPaths.length, 1);
+    expect(athlete.videoMetaDataPaths[0], 'my_folder/my_video2.meta');
   });
 
   test('Remove a non-existing video from an athlete', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
     expect(
-        () => athletes.removeVideo('John Doe',
-            videoPath: 'my_folder/my_video.mp4'),
+        () => athletes
+            .removeVideo(dummyVideoMetaData('John Doe', trialName: 'my_video')),
         throwsStateError);
   });
 
   test('Remove a video from a non-existing athlete', () async {
     final athletes = await getDatabase();
     expect(
-        () => athletes.removeVideo('John Doe',
-            videoPath: 'my_folder/my_video.mp4'),
+        () => athletes
+            .removeVideo(dummyVideoMetaData('John Doe', trialName: 'my_video')),
         throwsStateError);
   });
 
@@ -175,7 +200,8 @@ void main() {
   test('Re-add an athlete to the database', () async {
     final athletes = await getDatabase();
     await athletes.addAthlete('John Doe');
-    await athletes.addVideo('John Doe', videoPath: 'my_folder/my_video.mp4');
+    await athletes
+        .addVideo(dummyVideoMetaData('John Doe', trialName: 'my_video'));
     await athletes.removeAthlete('John Doe');
 
     expect(() => athletes.athleteFromName('John Doe'), throwsStateError);

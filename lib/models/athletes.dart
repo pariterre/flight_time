@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flight_time/models/video_meta_data.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
@@ -85,34 +86,34 @@ class Athletes {
 
   ///
   /// Add a video to an athlete, throws if the athlete does not exist or the video already exists
-  Future<void> addVideo(String name, {required String videoPath}) async {
+  Future<void> addVideo(VideoMetaData metaData) async {
     if (!isReady) throw StateError('Database is not ready');
 
     // Get the athlete and check if the video already exists
-    Athlete athlete = athleteFromName(name);
-    if (athlete.videoPaths.contains(videoPath)) {
+    Athlete athlete = athleteFromName(metaData.athleteName);
+    if (athlete.videoMetaDataPaths.contains(metaData.path)) {
       throw StateError('Video already exists');
     }
 
     // Add the video to the athlete and update the database
     await _store.record(athlete.name).put(_database!, athlete.toJson());
-    athlete._videoPaths.add(videoPath);
+    athlete._videoMetaDataPaths.add(metaData.path);
   }
 
   ///
   /// Remove a video from an athlete, throws if the athlete does not exist or the video does not exist
-  Future<void> removeVideo(String name, {required String videoPath}) async {
+  Future<void> removeVideo(VideoMetaData metaData) async {
     if (!isReady) throw StateError('Database is not ready');
 
     // Get the athlete and check if the video exists
-    Athlete athlete = athleteFromName(name);
-    if (!athlete.videoPaths.contains(videoPath)) {
+    Athlete athlete = athleteFromName(metaData.athleteName);
+    if (!athlete.videoMetaDataPaths.contains(metaData.path)) {
       throw StateError('Video does not exist');
     }
 
     // Remove the video from the athlete and update the database
     await _store.record(athlete.name).put(_database!, athlete.toJson());
-    athlete._videoPaths.remove(videoPath);
+    athlete._videoMetaDataPaths.remove(metaData.path);
   }
 
   ///
@@ -171,17 +172,19 @@ class AthletesMock extends Athletes {
 
 class Athlete {
   final String name;
-  final List<String> _videoPaths = [];
-  List<String> get videoPaths => List.unmodifiable(_videoPaths);
+  final List<String> _videoMetaDataPaths = [];
+  List<String> get videoMetaDataPaths => List.unmodifiable(_videoMetaDataPaths);
 
   Athlete({required this.name});
 
   Map<String, dynamic> toJson() => {
         'name': name,
-        'video_paths': videoPaths,
+        'meta_data_paths': videoMetaDataPaths,
       };
 
-  factory Athlete.fromJson(Map<String, dynamic> json) =>
+  factory Athlete.fromJson(
+          Map<String, dynamic> json) =>
       Athlete(name: json['name'])
-        .._videoPaths.addAll((json['video_paths'] as List).cast<String>());
+        .._videoMetaDataPaths
+            .addAll((json['meta_data_paths'] as List).cast<String>());
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 class VideoMetaData {
@@ -56,6 +57,11 @@ class VideoMetaData {
       'frameJumpStarts': frameJumpStarts,
       'frameJumpEnds': frameJumpEnds,
     };
+  }
+
+  factory VideoMetaData.fromFile(String file) {
+    final json = File(file).readAsStringSync();
+    return VideoMetaData.fromJson(jsonDecode(json));
   }
 
   factory VideoMetaData.fromJson(Map<String, dynamic> json) {
