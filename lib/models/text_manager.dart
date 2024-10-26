@@ -1,13 +1,21 @@
 enum Language { en, fr }
 
-class Texts {
+class TextManager {
   // Prepare the singleton
-  static final Texts _singleton = Texts._();
-  static Texts get instance => _singleton;
-  Texts._();
+  static final TextManager _singleton = TextManager._();
+  static TextManager get instance => _singleton;
+  TextManager._();
 
   // The current language
   Language language = Language.fr;
+
+  // The title
+  String get title => language == Language.en ? 'Flight Time' : 'Temps de vol';
+
+  // The MainDrawer related texts
+  String get camera => language == Language.en ? 'Camera' : 'Caméra';
+
+  String get playback => language == Language.en ? 'Playback' : 'Lecture';
 
   // The Recording related texts
   String get recordingVideo =>

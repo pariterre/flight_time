@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
-import 'package:flight_time/models/file_manager_helpers.dart';
-import 'package:flight_time/texts.dart';
+import 'package:flight_time/models/file_manager.dart';
+import 'package:flight_time/models/text_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -54,7 +54,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
         _trialNameController.text.isNotEmpty;
     if (_canSave) {
       _canSave = !(await File(
-              '${FileManagerHelpers.dataFolder}/${_athleteController.text}/${_trialNameController.text}.mp4')
+              '${FileManager.dataFolder}/${_athleteController.text}/${_trialNameController.text}.mp4')
           .exists());
     }
 
@@ -65,7 +65,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(Texts.instance.saveTrial),
+      title: Text(TextManager.instance.saveTrial),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -82,7 +82,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                 focusNode: node,
                 onFieldSubmitted: (value) => onSubmitted(),
                 decoration: InputDecoration(
-                  labelText: Texts.instance.athleteName,
+                  labelText: TextManager.instance.athleteName,
                 ),
               );
             },
@@ -115,7 +115,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
             controller: _trialNameController,
             focusNode: _trialFocusNode,
             decoration: InputDecoration(
-              labelText: Texts.instance.trialName,
+              labelText: TextManager.instance.trialName,
             ),
             // Prevent user from editing the prefix
             onChanged: (value) {
@@ -150,7 +150,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop<String?>(),
-          child: Text(Texts.instance.cancel),
+          child: Text(TextManager.instance.cancel),
         ),
         TextButton(
             onPressed: _canSave
@@ -162,7 +162,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                     });
                   }
                 : null,
-            child: Text(Texts.instance.confirm)),
+            child: Text(TextManager.instance.confirm)),
       ],
     );
   }

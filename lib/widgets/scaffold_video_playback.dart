@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flight_time/models/athletes.dart';
-import 'package:flight_time/models/file_manager_helpers.dart';
+import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
-import 'package:flight_time/texts.dart';
+import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
@@ -78,16 +78,16 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
         : await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(Texts.instance.areYouSureToQuit),
-              content: Text(Texts.instance.youWillLoseYourProgress),
+              title: Text(TextManager.instance.areYouSureToQuit),
+              content: Text(TextManager.instance.youWillLoseYourProgress),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(Texts.instance.cancel),
+                  child: Text(TextManager.instance.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(Texts.instance.quit),
+                  child: Text(TextManager.instance.quit),
                 ),
               ],
             ),
@@ -105,7 +105,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 athleteName: _athleteName!,
                 trialName: _trialName!,
                 baseFolder: Directory(
-                    '${await FileManagerHelpers.dataFolder}/${_athleteName!}'),
+                    '${await FileManager.dataFolder}/${_athleteName!}'),
                 duration: widget.controller.value.duration,
                 creationDate: now,
                 lastModified: now,
@@ -154,7 +154,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
       onPopInvokedWithResult: (didPop, result) => _managePop(),
       child: Scaffold(
           appBar: AppBar(
-            title: Text(Texts.instance.visualizingVideo),
+            title: Text(TextManager.instance.visualizingVideo),
             elevation: 0,
             leading: IconButton(
                 onPressed: () => _areYouSureDialog(context),

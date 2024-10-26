@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flight_time/models/file_manager_helpers.dart';
+import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast_io.dart';
@@ -36,7 +36,7 @@ class Athletes {
   ///
   /// Delete the cache folder where the videos are stored
   static Future<void> _deleteCacheFolder() async {
-    final cacheDir = Directory(await FileManagerHelpers.cacheFolder);
+    final cacheDir = Directory(await FileManager.cacheFolder);
     if (await cacheDir.exists()) {
       await cacheDir.delete(recursive: true);
     }
@@ -55,7 +55,7 @@ class Athletes {
   }
 
   Future<String> databasePath() async =>
-      join(await FileManagerHelpers.dataFolder, 'athletes.db');
+      join(await FileManager.dataFolder, 'athletes.db');
 
   ///
   /// Get an athlete from their name, throws if the athlete does not exist

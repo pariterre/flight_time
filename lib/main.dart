@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
-import 'package:flight_time/models/file_manager_helpers.dart';
+import 'package:flight_time/models/file_manager.dart';
+import 'package:flight_time/screens/athletes_navigation_page.dart';
 import 'package:flight_time/screens/camera_page.dart';
 import 'package:flight_time/screens/playback_page.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Athletes.initialize();
 
-  final dbFile = File('${await FileManagerHelpers.dataFolder}/athletes.db');
+  final dbFile = File('${await FileManager.dataFolder}/athletes.db');
   if (await dbFile.exists()) {
     await dbFile.delete();
   }
@@ -45,6 +46,8 @@ class MyApp extends StatelessWidget {
       routes: {
         CameraPage.routeName: (context) => const CameraPage(),
         PlaybackPage.routeName: (context) => const PlaybackPage(),
+        AthletesNavigationPage.routeName: (context) =>
+            const AthletesNavigationPage(),
       },
     );
   }

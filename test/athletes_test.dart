@@ -8,7 +8,7 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
-import 'package:flight_time/models/file_manager_helpers.dart';
+import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,7 +41,7 @@ VideoMetaData dummyVideoMetaData(String athleteName,
 }
 
 void main() {
-  FileManagerHelpers.useMockerPath = true;
+  FileManager.useMockerPath = true;
 
   test('One must initialize the database before using it', () async {
     // Throws a type error

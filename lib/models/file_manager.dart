@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-class FileManagerHelpers {
+class FileManager {
   static bool useMockerPath = false;
 
   static Future<String> get baseFolder async => useMockerPath
