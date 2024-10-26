@@ -8,6 +8,7 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/models/file_manager_helpers.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,7 @@ Future<Athletes> getDatabase() async {
   }
   PathProviderLinux.registerWith();
 
-  await AthletesMock.initialize();
+  await Athletes.initialize();
   await Athletes.instance.reset();
   return Athletes.instance;
 }
@@ -40,6 +41,8 @@ VideoMetaData dummyVideoMetaData(String athleteName,
 }
 
 void main() {
+  FileManagerHelpers.useMockerPath = true;
+
   test('One must initialize the database before using it', () async {
     // Throws a type error
     expect(() => Athletes.instance, throwsA(isA<TypeError>()));
@@ -51,8 +54,8 @@ void main() {
       throw UnsupportedError('This test is for Linux only');
     }
     PathProviderLinux.registerWith();
-    await AthletesMock.initialize();
-    expect(AthletesMock.instance.isReady, true);
+    await Athletes.initialize();
+    expect(Athletes.instance.isReady, true);
   });
 
   test('Reset the database', () async {

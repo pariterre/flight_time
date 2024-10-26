@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:flight_time/models/file_manager_helpers.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 
 class Athletes {
@@ -36,8 +36,7 @@ class Athletes {
   ///
   /// Delete the cache folder where the videos are stored
   static Future<void> _deleteCacheFolder() async {
-    final cacheFolder = (await getApplicationCacheDirectory()).path;
-    final cacheDir = Directory(cacheFolder);
+    final cacheDir = Directory(await FileManagerHelpers.cacheFolder);
     if (await cacheDir.exists()) {
       await cacheDir.delete(recursive: true);
     }
@@ -55,15 +54,8 @@ class Athletes {
     _isReady = true;
   }
 
-  Future<String> databasePath() async {
-    // get the application documents directory
-    final dir = await getApplicationDocumentsDirectory();
-    if (!(await dir.exists())) {
-      await dir.create(recursive: true);
-    }
-
-    return join(dir.path, 'athletes.db');
-  }
+  Future<String> databasePath() async =>
+      join(await FileManagerHelpers.dataFolder, 'athletes.db');
 
   ///
   /// Get an athlete from their name, throws if the athlete does not exist
@@ -143,30 +135,6 @@ class Athletes {
       await _store.record(athlete.name).delete(_database!);
     }
     _athletes.clear();
-  }
-}
-
-class AthletesMock extends Athletes {
-  static AthletesMock get instance => Athletes._instance! as AthletesMock;
-  AthletesMock._() : super._();
-
-  ///
-  /// Initialize the database
-  static Future<void> initialize() async {
-    if (Athletes._instance?.isReady ?? false) return;
-
-    Athletes._instance = AthletesMock._();
-    Athletes._instance!._initializeDataBase();
-
-    while (!Athletes._instance!.isReady) {
-      // wait for the database to be ready
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  @override
-  Future<String> databasePath() async {
-    return join('./', 'mock_athletes_database.db');
   }
 }
 

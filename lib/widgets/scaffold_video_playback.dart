@@ -3,12 +3,12 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/models/file_manager_helpers.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/texts.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 
 class ScaffoldVideoPlayback extends StatefulWidget {
@@ -100,12 +100,12 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 
   void _manageFileSaving() async {
     final now = DateTime.now();
-    final appFolder = (await getApplicationDocumentsDirectory()).path;
     _metaData = (_isFileNew
             ? VideoMetaData(
                 athleteName: _athleteName!,
                 trialName: _trialName!,
-                baseFolder: Directory('$appFolder/${_athleteName!}'),
+                baseFolder: Directory(
+                    '${await FileManagerHelpers.dataFolder}/${_athleteName!}'),
                 duration: widget.controller.value.duration,
                 creationDate: now,
                 lastModified: now,

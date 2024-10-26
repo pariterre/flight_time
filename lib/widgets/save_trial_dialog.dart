@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/models/file_manager_helpers.dart';
 import 'package:flight_time/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 
 String _lastAthlete = '';
 
@@ -53,9 +53,8 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
     _canSave = _athleteController.text.isNotEmpty &&
         _trialNameController.text.isNotEmpty;
     if (_canSave) {
-      final appFolder = (await getApplicationDocumentsDirectory()).path;
       _canSave = !(await File(
-              '$appFolder/${_athleteController.text}/${_trialNameController.text}.mp4')
+              '${FileManagerHelpers.dataFolder}/${_athleteController.text}/${_trialNameController.text}.mp4')
           .exists());
     }
 
