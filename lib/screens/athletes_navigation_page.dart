@@ -1,6 +1,7 @@
 import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
+import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/animated_expanding_card.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,8 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final athletes = Athletes.instance.athletes;
+    final athletes = [...Athletes.instance.athletes]
+      ..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(
         appBar: AppBar(
@@ -76,6 +78,12 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                                 metaData: metaData,
                                 onDeleted: () =>
                                     _confirmDelete(metaData: metaData),
+                                onTap: () async {
+                                  await Navigator.pushNamed(
+                                      context, PlaybackPage.routeName,
+                                      arguments: {'meta_data': metaData});
+                                  setState(() {});
+                                },
                               ),
                             );
                           },
@@ -92,72 +100,77 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
 }
 
 class _VideoMetaDataListTile extends StatelessWidget {
-  const _VideoMetaDataListTile({this.metaData, this.onDeleted});
+  const _VideoMetaDataListTile({this.metaData, this.onDeleted, this.onTap});
 
   final VideoMetaData? metaData;
+  final Function()? onTap;
   final Function()? onDeleted;
 
   @override
   Widget build(BuildContext context) {
     final isHeader = metaData == null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              isHeader ? TextManager.instance.trialName : metaData!.trialName,
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                  fontWeight: isHeader ? FontWeight.bold : FontWeight.normal),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                isHeader ? TextManager.instance.trialName : metaData!.trialName,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    fontWeight: isHeader ? FontWeight.bold : FontWeight.normal),
+              ),
             ),
-          ),
-          Align(
-            alignment: Alignment(0.3, 0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  isHeader
-                      ? TextManager.instance.flightTime
-                      : '${(metaData!.fligthTime.inMilliseconds / 1000).toStringAsFixed(3)} s',
-                  style: TextStyle(
-                      fontWeight:
-                          isHeader ? FontWeight.bold : FontWeight.normal),
-                ),
-                Text(
-                  ' / ',
-                  style: TextStyle(
-                      fontWeight:
-                          isHeader ? FontWeight.bold : FontWeight.normal),
-                ),
-                Text(
-                  isHeader
-                      ? TextManager.instance.flightHeight
-                      : '${(metaData!.flightHeight * 100).toStringAsFixed(1)} cm',
-                  style: TextStyle(
-                      fontWeight:
-                          isHeader ? FontWeight.bold : FontWeight.normal),
-                ),
-              ],
+            Align(
+              alignment: Alignment(0.3, 0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isHeader
+                        ? TextManager.instance.flightTime
+                        : '${(metaData!.fligthTime.inMilliseconds / 1000).toStringAsFixed(3)} s',
+                    style: TextStyle(
+                        fontWeight:
+                            isHeader ? FontWeight.bold : FontWeight.normal),
+                  ),
+                  Text(
+                    ' / ',
+                    style: TextStyle(
+                        fontWeight:
+                            isHeader ? FontWeight.bold : FontWeight.normal),
+                  ),
+                  Text(
+                    isHeader
+                        ? TextManager.instance.flightHeight
+                        : '${(metaData!.flightHeight * 100).toStringAsFixed(1)} cm',
+                    style: TextStyle(
+                        fontWeight:
+                            isHeader ? FontWeight.bold : FontWeight.normal),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Visibility(
-              visible: !isHeader,
-              maintainSize: true,
-              maintainState: true,
-              maintainAnimation: true,
-              child: IconButton(
-                  onPressed: onDeleted,
-                  icon: Icon(Icons.delete, color: Colors.red)),
-            ),
-          )
-        ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: Visibility(
+                visible: !isHeader,
+                maintainSize: true,
+                maintainState: true,
+                maintainAnimation: true,
+                child: IconButton(
+                    onPressed: onDeleted,
+                    icon: Icon(Icons.delete, color: Colors.red)),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

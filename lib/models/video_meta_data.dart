@@ -85,6 +85,11 @@ class VideoMetaData {
       await baseFolder.create(recursive: true);
     }
 
+    // Delete the file if it exists, otherwise the write silently fails
+    if (await File(path).exists()) {
+      await File(path).delete();
+    }
+
     await File(path).writeAsString(
         JsonEncoder.withIndent('  ').convert(toJson()),
         flush: true);

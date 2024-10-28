@@ -26,20 +26,27 @@ class ScaffoldVideoPlayback extends StatefulWidget {
 }
 
 class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
-  bool get _isNewVideo => _metaData == null;
+  bool get _isVideoNew => _metaData == null;
   late VideoMetaData? _metaData = widget.videoMetaData;
 
   bool _canPop = false;
-  late bool _canSave = _isNewVideo;
+  late bool _canSave = _isVideoNew;
 
   late String? _athleteName = _metaData?.athlete.name;
   late String? _trialName = _metaData?.trialName;
-  bool get _hasSaved => _athleteName != null && _trialName != null;
 
-  final _videoPlaybackWatcher = _VideoPlaybackWatcher();
+  late final _videoPlaybackWatcher = _VideoPlaybackWatcher(
+      start: _metaData?.timeJumpStarts ?? Duration.zero,
+      end: _metaData?.timeJumpEnds ?? widget.controller.value.duration);
+
+  @override
+  void initState() {
+    widget.controller.seekTo(_videoPlaybackWatcher.start);
+    super.initState();
+  }
 
   Future<void> _onSaveVideo() async {
-    final response = _isNewVideo
+    final response = _isVideoNew
         ? await showDialog<Map<String, String>?>(
             context: context, builder: (context) => SaveTrialDialog())
         : {'athlete': _metaData!.athlete.name, 'trial': _metaData!.trialName};
@@ -72,9 +79,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
   }
 
   void _areYouSureDialog(context) async {
-    _canPop = _hasSaved
-        ? true
-        : await showDialog(
+    _canPop = _canSave
+        ? await showDialog(
             context: context,
             builder: (context) => AlertDialog(
               title: Text(TextManager.instance.areYouSureQuit),
@@ -90,7 +96,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 ),
               ],
             ),
-          );
+          )
+        : true;
 
     if (_canPop) {
       Navigator.of(context).pop();
@@ -100,7 +107,10 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
   void _manageFileSaving() async {
     final now = DateTime.now();
 
-    _metaData = (_isNewVideo
+    // We have to copy because _metaData won't be null anymore
+    final isVideoNew = _isVideoNew;
+
+    _metaData = (isVideoNew
         ? VideoMetaData(
             athlete: Athletes.instance.athleteFromNameOrAdd(_athleteName!),
             trialName: _trialName!,
@@ -116,17 +126,17 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
             timeJumpStarts: _videoPlaybackWatcher.start,
             timeJumpEnds: _videoPlaybackWatcher.end));
 
-    if (_isNewVideo) {
-      // If the file is new, move it to the correct folder
-      await File(widget.filePath).rename(_metaData!.videoPath);
-    }
-
     // Add the video to the database
     await Athletes.instance.addVideo(_metaData!);
+
+    // If the file is new, move it to the correct folder
+    if (isVideoNew) {
+      await File(widget.filePath).rename(_metaData!.videoPath);
+    }
   }
 
   void _managePop() {
-    if (!_hasSaved && _isNewVideo) {
+    if (_canSave && _isVideoNew) {
       // If the file is new and the user did not save it,
       // it means they just recorded it but do not want to keep it, then delete it
       File(widget.filePath).delete();
@@ -189,8 +199,10 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 }
 
 class _VideoPlaybackWatcher {
-  Duration start = Duration.zero;
-  Duration end = Duration.zero;
+  Duration start;
+  Duration end;
+
+  _VideoPlaybackWatcher({required this.start, required this.end});
 }
 
 class _VideoPlaybackSlider extends StatefulWidget {
@@ -213,9 +225,13 @@ class _VideoPlaybackSlider extends StatefulWidget {
 }
 
 class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
-  var _ranges = const RangeValues(0, 1);
+  late var _ranges = RangeValues(
+      widget.watcher.start.inMilliseconds /
+          widget.videoController.value.duration.inMilliseconds,
+      widget.watcher.end.inMilliseconds /
+          widget.videoController.value.duration.inMilliseconds);
   bool _focusOnFirst = true;
-  var _playbackMarker = 0.0;
+  late var _playbackMarker = _ranges.start;
 
   @override
   void initState() {
@@ -282,28 +298,46 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                 values: _ranges,
                 onChanged: _onUpdateRanges,
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _MarkerButton(
-                    onTap: _playbackMarker < _ranges.end
-                        ? () => _onUpdateRanges(
-                            RangeValues(_playbackMarker, _ranges.end))
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  _PlayButton(
-                      isPlaying: widget.videoController.value.isPlaying,
-                      onPause: widget.onPause,
-                      onPlay: widget.onPlay),
-                  const SizedBox(width: 12),
-                  _MarkerButton(
-                    onTap: _playbackMarker > _ranges.start
-                        ? () => _onUpdateRanges(
-                            RangeValues(_ranges.start, _playbackMarker))
-                        : null,
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3 * padding),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _MarkerButton(
+                      symbol: '|',
+                      onTap: _playbackMarker < _ranges.end
+                          ? () => _onUpdateRanges(
+                              RangeValues(_playbackMarker, _ranges.end))
+                          : null,
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _MarkerButton(
+                          symbol: '<',
+                          onTap: () => _setPlayingValue(_ranges.start),
+                        ),
+                        SizedBox(width: padding),
+                        _PlayButton(
+                            isPlaying: widget.videoController.value.isPlaying,
+                            onPause: widget.onPause,
+                            onPlay: widget.onPlay),
+                        SizedBox(width: padding),
+                        _MarkerButton(
+                          symbol: '>',
+                          onTap: () => _setPlayingValue(_ranges.end),
+                        ),
+                      ],
+                    ),
+                    _MarkerButton(
+                      symbol: '|',
+                      onTap: _playbackMarker > _ranges.start
+                          ? () => _onUpdateRanges(
+                              RangeValues(_ranges.start, _playbackMarker))
+                          : null,
+                    ),
+                  ],
+                ),
               ),
               Slider(
                 value: _playbackMarker,
@@ -348,8 +382,9 @@ class _PlayButton extends StatelessWidget {
 }
 
 class _MarkerButton extends StatelessWidget {
-  const _MarkerButton({required this.onTap});
+  const _MarkerButton({required this.symbol, required this.onTap});
 
+  final String symbol;
   final Function()? onTap;
 
   @override
@@ -368,7 +403,7 @@ class _MarkerButton extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
-            child: Text('|'),
+            child: Text(symbol),
           )),
     );
   }

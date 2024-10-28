@@ -75,7 +75,8 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
             optionsBuilder: (controller) => Athletes.instance.athleteNames
                 .where((name) =>
                     name.toLowerCase().contains(controller.text.toLowerCase()))
-                .toList(),
+                .toList()
+              ..sort((a, b) => a.compareTo(b)),
             fieldViewBuilder: (context, controller, node, onSubmitted) {
               return TextFormField(
                 controller: controller,

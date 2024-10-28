@@ -21,8 +21,9 @@ class TextManager {
   String get recordingVideo =>
       language == Language.en ? 'Video recording' : 'Enregistrement video';
 
-  String get preparingTrial =>
-      language == Language.en ? 'Preparing trial' : 'Préparation de l\'essai';
+  String get preparingTrial => language == Language.en
+      ? 'Preparing the video'
+      : 'Préparation de la vidéo';
 
   String get visualizingVideo => language == Language.en
       ? 'Visualizing video'
