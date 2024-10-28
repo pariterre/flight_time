@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/file_manager.dart';
-import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/models/text_manager.dart';
+import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
@@ -27,23 +26,23 @@ class ScaffoldVideoPlayback extends StatefulWidget {
 }
 
 class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
-  bool get _isFileNew => _metaData == null;
+  bool get _isNewVideo => _metaData == null;
   late VideoMetaData? _metaData = widget.videoMetaData;
 
   bool _canPop = false;
-  late bool _canSave = _isFileNew;
+  late bool _canSave = _isNewVideo;
 
-  late String? _athleteName = _metaData?.athleteName;
+  late String? _athleteName = _metaData?.athlete.name;
   late String? _trialName = _metaData?.trialName;
   bool get _hasSaved => _athleteName != null && _trialName != null;
 
   final _videoPlaybackWatcher = _VideoPlaybackWatcher();
 
   Future<void> _onSaveVideo() async {
-    final response = _isFileNew
+    final response = _isNewVideo
         ? await showDialog<Map<String, String>?>(
             context: context, builder: (context) => SaveTrialDialog())
-        : {'athlete': _metaData!.athleteName, 'trial': _metaData!.trialName};
+        : {'athlete': _metaData!.athlete.name, 'trial': _metaData!.trialName};
     if (response == null) return;
 
     _athleteName = response['athlete'];
@@ -78,7 +77,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
         : await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(TextManager.instance.areYouSureToQuit),
+              title: Text(TextManager.instance.areYouSureQuit),
               content: Text(TextManager.instance.youWillLoseYourProgress),
               actions: [
                 TextButton(
@@ -100,41 +99,34 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 
   void _manageFileSaving() async {
     final now = DateTime.now();
-    _metaData = (_isFileNew
-            ? VideoMetaData(
-                athleteName: _athleteName!,
-                trialName: _trialName!,
-                baseFolder: Directory(
-                    '${await FileManager.dataFolder}/${_athleteName!}'),
-                duration: widget.controller.value.duration,
-                creationDate: now,
-                lastModified: now,
-                frameJumpStarts: -1,
-                frameJumpEnds: -1)
-            : _metaData!)
-        .copyWith(
-            lastModified: DateTime.now(),
-            frameJumpStarts: _videoPlaybackWatcher.frameJumpStarts,
-            frameJumpEnds: _videoPlaybackWatcher.frameJumpEnds);
 
-    // Create the target structure
-    if (!(await _metaData!.baseFolder.exists())) {
-      await _metaData!.baseFolder.create(recursive: true);
-    }
+    _metaData = (_isNewVideo
+        ? VideoMetaData(
+            athlete: Athletes.instance.athleteFromNameOrAdd(_athleteName!),
+            trialName: _trialName!,
+            baseFolder:
+                Directory('${await FileManager.dataFolder}/${_athleteName!}'),
+            duration: widget.controller.value.duration,
+            creationDate: now,
+            lastModified: now,
+            timeJumpStarts: _videoPlaybackWatcher.start,
+            timeJumpEnds: _videoPlaybackWatcher.end)
+        : _metaData!.copyWith(
+            lastModified: now,
+            timeJumpStarts: _videoPlaybackWatcher.start,
+            timeJumpEnds: _videoPlaybackWatcher.end));
 
-    // Save the metadata and the video
-    await File(_metaData!.path).writeAsString(
-        JsonEncoder.withIndent('  ').convert(_metaData!.toJson()),
-        flush: true);
-    if (_isFileNew) {
-      // If the file is new, move it to the correct folder and add it to the database
+    if (_isNewVideo) {
+      // If the file is new, move it to the correct folder
       await File(widget.filePath).rename(_metaData!.videoPath);
-      Athletes.instance.addVideo(_metaData!);
     }
+
+    // Add the video to the database
+    await Athletes.instance.addVideo(_metaData!);
   }
 
   void _managePop() {
-    if (!_hasSaved && _isFileNew) {
+    if (!_hasSaved && _isNewVideo) {
       // If the file is new and the user did not save it,
       // it means they just recorded it but do not want to keep it, then delete it
       File(widget.filePath).delete();
@@ -197,8 +189,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 }
 
 class _VideoPlaybackWatcher {
-  int frameJumpStarts = -1;
-  int frameJumpEnds = -1;
+  Duration start = Duration.zero;
+  Duration end = Duration.zero;
 }
 
 class _VideoPlaybackSlider extends StatefulWidget {
@@ -264,12 +256,14 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     widget.onUpdateTimeline(_focusOnFirst ? values.start : values.end);
     _ranges = values;
 
-    widget.watcher.frameJumpStarts =
-        (values.start * widget.videoController.value.duration.inMilliseconds)
-            .toInt();
-    widget.watcher.frameJumpEnds =
-        (values.end * widget.videoController.value.duration.inMilliseconds)
-            .toInt();
+    widget.watcher.start = Duration(
+        milliseconds: (values.start *
+                widget.videoController.value.duration.inMilliseconds)
+            .toInt());
+    widget.watcher.end = Duration(
+        milliseconds:
+            (values.end * widget.videoController.value.duration.inMilliseconds)
+                .toInt());
     setState(() {});
   }
 

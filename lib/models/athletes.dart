@@ -34,6 +34,10 @@ class Athletes {
   }
 
   ///
+  /// Return an immutable list of athletes
+  List<Athlete> get athletes => List.unmodifiable(_athletes);
+
+  ///
   /// Delete the cache folder where the videos are stored
   static Future<void> _deleteCacheFolder() async {
     final cacheDir = Directory(await FileManager.cacheFolder);
@@ -63,6 +67,17 @@ class Athletes {
       _athletes.firstWhere((athlete) => athlete.name == name);
 
   ///
+  /// Get an athlete from their name, adds it if it does not exist
+  Athlete athleteFromNameOrAdd(String name) {
+    try {
+      return athleteFromName(name);
+    } on StateError {
+      addAthlete(name);
+      return athleteFromName(name);
+    }
+  }
+
+  ///
   /// Add a new athlete from their name, if the athlete already exists, throw an error
   /// Return the newly created athlete
   Future<void> addAthlete(String name) async {
@@ -77,35 +92,49 @@ class Athletes {
   }
 
   ///
-  /// Add a video to an athlete, throws if the athlete does not exist or the video already exists
+  /// Add a video to an athlete, if the video already exists in the database,
+  /// only the metadata file is updated
   Future<void> addVideo(VideoMetaData metaData) async {
     if (!isReady) throw StateError('Database is not ready');
 
-    // Get the athlete and check if the video already exists
-    Athlete athlete = athleteFromName(metaData.athleteName);
-    if (athlete.videoMetaDataPaths.contains(metaData.path)) {
-      throw StateError('Video already exists');
-    }
+    final athlete = metaData.athlete;
 
-    // Add the video to the athlete and update the database
-    await _store.record(athlete.name).put(_database!, athlete.toJson());
+    // Update the metadata file
+    await metaData.writeToDisk();
+
+    // If the video already exists, we are done
+    if (athlete.videoMetaDataPaths.contains(metaData.path)) return;
+
+    // Add the video to the athlete
     athlete._videoMetaDataPaths.add(metaData.path);
+
+    // Update the database
+    await _store.record(athlete.name).put(_database!, athlete.toJson());
   }
 
   ///
-  /// Remove a video from an athlete, throws if the athlete does not exist or the video does not exist
+  /// Remove a video from an athlete, throws if the video does not exist
   Future<void> removeVideo(VideoMetaData metaData) async {
     if (!isReady) throw StateError('Database is not ready');
 
-    // Get the athlete and check if the video exists
-    Athlete athlete = athleteFromName(metaData.athleteName);
+    final athlete = metaData.athlete;
+
+    // If the video does not exist, then it is not possible to remove it
     if (!athlete.videoMetaDataPaths.contains(metaData.path)) {
       throw StateError('Video does not exist');
     }
 
-    // Remove the video from the athlete and update the database
-    await _store.record(athlete.name).put(_database!, athlete.toJson());
+    // Delete the metadata
+    await metaData.deleteFile();
+
+    // Remove the video from the athlete
     athlete._videoMetaDataPaths.remove(metaData.path);
+
+    // Update the database
+    await _store.record(athlete.name).put(_database!, athlete.toJson());
+
+    // Remove file from disk
+    File(metaData.videoPath).delete();
   }
 
   ///
@@ -120,9 +149,8 @@ class Athletes {
   }
 
   ///
-  /// Get the list of athletes names
-  List<String> get athleteNames =>
-      _athletes.map((athlete) => athlete.name).toList();
+  /// Get the athletes names
+  Iterable<String> get athleteNames => _athletes.map((athlete) => athlete.name);
 
   ///
   /// Reset the database

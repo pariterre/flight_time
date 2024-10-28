@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flight_time/models/athletes.dart';
+
 class VideoMetaData {
-  final String athleteName;
+  final Athlete athlete;
   final String trialName;
   final Directory baseFolder;
 
@@ -10,52 +12,47 @@ class VideoMetaData {
   final DateTime creationDate;
   final DateTime lastModified;
 
-  final int frameJumpStarts;
-  final int frameJumpEnds;
+  final Duration timeJumpStarts;
+  final Duration timeJumpEnds;
 
   VideoMetaData({
-    required this.athleteName,
+    required this.athlete,
     required this.trialName,
     required this.baseFolder,
     required this.duration,
     required this.creationDate,
     required this.lastModified,
-    required this.frameJumpStarts,
-    required this.frameJumpEnds,
+    required this.timeJumpStarts,
+    required this.timeJumpEnds,
   });
 
   VideoMetaData copyWith({
-    String? athleteName,
-    String? trialName,
-    Directory? baseFolder,
-    Duration? duration,
-    DateTime? creationDate,
     DateTime? lastModified,
-    int? frameJumpStarts,
-    int? frameJumpEnds,
+    Duration? timeJumpStarts,
+    Duration? timeJumpEnds,
   }) {
     return VideoMetaData(
-      athleteName: athleteName ?? this.athleteName,
-      trialName: trialName ?? this.trialName,
-      baseFolder: baseFolder ?? this.baseFolder,
-      duration: duration ?? this.duration,
-      creationDate: creationDate ?? this.creationDate,
+      athlete: athlete,
+      trialName: trialName,
+      baseFolder: baseFolder,
+      duration: duration,
+      creationDate: creationDate,
       lastModified: lastModified ?? this.lastModified,
-      frameJumpStarts: frameJumpStarts ?? this.frameJumpStarts,
-      frameJumpEnds: frameJumpEnds ?? this.frameJumpEnds,
+      timeJumpStarts: timeJumpStarts ?? this.timeJumpStarts,
+      timeJumpEnds: timeJumpEnds ?? this.timeJumpEnds,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'athleteName': athleteName,
+      'athleteName': athlete.name,
       'trialName': trialName,
       'baseFolder': baseFolder.path,
       'duration': duration.inMilliseconds,
       'creationDate': creationDate.millisecondsSinceEpoch,
       'lastModified': lastModified.millisecondsSinceEpoch,
-      'frameJumpStarts': frameJumpStarts,
-      'frameJumpEnds': frameJumpEnds,
+      'timeJumpStarts': timeJumpStarts.inMilliseconds,
+      'timeJumpEnds': timeJumpEnds.inMilliseconds,
     };
   }
 
@@ -66,17 +63,45 @@ class VideoMetaData {
 
   factory VideoMetaData.fromJson(Map<String, dynamic> json) {
     return VideoMetaData(
-      athleteName: json['athleteName'],
+      athlete: Athletes.instance.athleteFromName(json['athleteName']),
       trialName: json['trialName'],
       baseFolder: Directory(json['baseFolder']),
       duration: Duration(milliseconds: json['duration']),
       creationDate: DateTime.fromMillisecondsSinceEpoch(json['creationDate']),
       lastModified: DateTime.fromMillisecondsSinceEpoch(json['lastModified']),
-      frameJumpStarts: json['frameJumpStarts'],
-      frameJumpEnds: json['frameJumpEnds'],
+      timeJumpStarts: Duration(milliseconds: json['timeJumpStarts']),
+      timeJumpEnds: Duration(milliseconds: json['timeJumpEnds']),
     );
   }
 
   String get videoPath => '${baseFolder.path}/$trialName.mp4';
   String get path => '${baseFolder.path}/$trialName.meta';
+
+  ///
+  /// Write the metadata on the disk. This method do not update the database.
+  Future<void> writeToDisk() async {
+    // Create the target structure
+    if (!(await baseFolder.exists())) {
+      await baseFolder.create(recursive: true);
+    }
+
+    await File(path).writeAsString(
+        JsonEncoder.withIndent('  ').convert(toJson()),
+        flush: true);
+  }
+
+  ///
+  /// Delete the metadata file from the disk. This method do not update the database.
+  Future<void> deleteFile() async {
+    if (await File(path).exists()) {
+      await File(path).delete();
+    }
+  }
+
+  Duration get fligthTime => timeJumpEnds - timeJumpStarts;
+  double get flightHeight =>
+      9.81 *
+      (fligthTime.inMilliseconds / 1000) *
+      (fligthTime.inMilliseconds / 1000) /
+      8.0;
 }

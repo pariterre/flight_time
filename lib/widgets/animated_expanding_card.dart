@@ -8,8 +8,12 @@ class AnimatedExpandingCard extends StatefulWidget {
     this.expandingDuration = const Duration(milliseconds: 300),
     this.onTapHeader,
     this.initialExpandedState = false,
+    this.mainColor,
+    this.headerBackgroundColor,
   });
 
+  final Color? mainColor;
+  final Color? headerBackgroundColor;
   final Duration expandingDuration;
   final Widget header;
   final Function(bool newState)? onTapHeader;
@@ -44,34 +48,43 @@ class _AnimatedExpandingCardState extends State<AnimatedExpandingCard>
   Widget build(BuildContext context) {
     return Card(
       elevation: 10,
+      color: widget.mainColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          InkWell(
-            onTap: () {
-              _isExpanded = !_isExpanded;
-              _isExpanded
-                  ? _expandingAnimationController.forward()
-                  : _expandingAnimationController.reverse();
+          Container(
+            decoration: BoxDecoration(
+              color: widget.headerBackgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: InkWell(
+              onTap: () {
+                _isExpanded = !_isExpanded;
+                _isExpanded
+                    ? _expandingAnimationController.forward()
+                    : _expandingAnimationController.reverse();
 
-              if (widget.onTapHeader != null) widget.onTapHeader!(_isExpanded);
-              setState(() {});
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(child: widget.header),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12.0, right: 16.0),
-                  child: Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    size: 30,
-                    color: Colors.grey[700],
-                  ),
-                )
-              ],
+                if (widget.onTapHeader != null) {
+                  widget.onTapHeader!(_isExpanded);
+                }
+                setState(() {});
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(child: widget.header),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0, right: 16.0),
+                    child: Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 30,
+                      color: Colors.grey[700],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
           SizeTransition(

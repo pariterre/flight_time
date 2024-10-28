@@ -29,14 +29,14 @@ Future<Athletes> getDatabase() async {
 VideoMetaData dummyVideoMetaData(String athleteName,
     {required String trialName}) {
   return VideoMetaData(
-    athleteName: athleteName,
+    athlete: Athletes.instance.athleteFromNameOrAdd(athleteName),
     trialName: trialName,
     baseFolder: Directory('my_folder'),
     duration: Duration.zero,
     creationDate: DateTime(0),
     lastModified: DateTime(0),
-    frameJumpStarts: -1,
-    frameJumpEnds: -1,
+    timeJumpStarts: Duration.zero,
+    timeJumpEnds: Duration.zero,
   );
 }
 

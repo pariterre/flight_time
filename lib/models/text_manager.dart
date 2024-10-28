@@ -38,9 +38,18 @@ class TextManager {
   String get trialName =>
       language == Language.en ? 'Trial name' : 'Nom de l\'essai';
 
+  // Show trial texts
+  String get flightTime => language == Language.en ? 'Time' : 'Temps';
+
+  String get flightHeight => language == Language.en ? 'Height' : 'Hauteur';
+
+  String get areYouSureDelete => language == Language.en
+      ? 'Do you really want to delete the video?'
+      : 'Voulez-vous vraiment supprimer la vidéo?';
+
   // Misc texts
-  String get areYouSureToQuit => language == Language.en
-      ? 'Are you sure to quit?'
+  String get areYouSureQuit => language == Language.en
+      ? 'Do you really want to quit?'
       : 'Voulez-vous vraiment quitter?';
 
   String get youWillLoseYourProgress => language == Language.en
