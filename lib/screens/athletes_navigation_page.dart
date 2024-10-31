@@ -16,6 +16,12 @@ class AthletesNavigationPage extends StatefulWidget {
 }
 
 class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
+  @override
+  void initState() {
+    Athletes.instance.checkForLooseVideos();
+    super.initState();
+  }
+
   Future<void> _confirmDelete({required VideoMetaData metaData}) async {
     final response = await showDialog(
       context: context,
@@ -70,7 +76,7 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                         child: ListView.builder(
                           itemCount: athlete.videoMetaDataPaths.length,
                           itemBuilder: (context, index) {
-                            final metaData = VideoMetaData.fromFile(
+                            final metaData = VideoMetaData.fromMetaDataFile(
                                 athlete.videoMetaDataPaths[index]);
                             return SizedBox(
                               height: height,

@@ -58,6 +58,43 @@ class Athletes {
     _isReady = true;
   }
 
+  ///
+  /// This method checks for loose videos in the cache folder and in the data folder
+  /// If a video is found in the cache folder, it throws. This is currently for
+  /// debugging purposes only, but at some point, it could be used to recover
+  /// videos that were not properly added to the database
+  Future<void> checkForLooseVideos() async {
+    if (!isReady) throw StateError('Database is not ready');
+
+    // Look at videos that are in the cache folder. They do not belong to any athlete yet
+    final cacheDir = Directory(await FileManager.cacheFolder);
+    final files = await cacheDir.list().toList();
+    for (var file in files) {
+      if (file is File) {
+        throw 'Just found a loose video in the cache folder';
+      }
+    }
+
+    // Check in the data folder for each athlete for videos that do not have a pairing metadata file
+    for (var athlete in _athletes) {
+      final athleteDir =
+          Directory(join(await FileManager.dataFolder, athlete.name));
+      if (!await athleteDir.exists()) continue;
+
+      final files = await athleteDir.list().toList();
+      for (var file in files) {
+        if (file is File &&
+            extension(file.path) == '.mp4' &&
+            !await File(join(athleteDir.path,
+                    '${basenameWithoutExtension(file.path)}.meta'))
+                .exists()) {
+          throw 'Just found a loose video in the data folder';
+        }
+      }
+    }
+    return;
+  }
+
   Future<String> databasePath() async =>
       join(await FileManager.dataFolder, 'athletes.db');
 

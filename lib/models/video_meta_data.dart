@@ -56,7 +56,7 @@ class VideoMetaData {
     };
   }
 
-  factory VideoMetaData.fromFile(String file) {
+  factory VideoMetaData.fromMetaDataFile(String file) {
     final json = File(file).readAsStringSync();
     return VideoMetaData.fromJson(jsonDecode(json));
   }
