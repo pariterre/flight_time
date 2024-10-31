@@ -61,11 +61,17 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
     setState(() {});
   }
 
-  void _onUpdateTimeline(double value) {
+  bool _isChangingTimeline = false;
+  void _onUpdateTimeline(double value) async {
+    if (_isChangingTimeline) return;
+    _isChangingTimeline = true;
+
     final duration = widget.controller.value.duration;
     final position = duration * value;
-    widget.controller.seekTo(position);
+    await widget.controller.seekTo(position);
+    await Future.delayed(Duration(milliseconds: 250));
     _canSave = true;
+    _isChangingTimeline = false;
     setState(() {});
   }
 
@@ -251,12 +257,19 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     return position.inMilliseconds / duration.inMilliseconds;
   }
 
-  void _setPlayingValue(double value) {
+  bool _isChanging = false;
+  void _setPlayingValue(double value) async {
+    if (_isChanging) return;
+    _isChanging = true;
+
     final duration = widget.videoController.value.duration;
     final position =
         Duration(milliseconds: (value * duration.inMilliseconds).toInt());
-    widget.videoController.seekTo(position);
+    await widget.videoController.seekTo(position);
+    await Future.delayed(Duration(milliseconds: 250));
+
     _playbackMarker = value;
+    _isChanging = false;
     setState(() {});
   }
 
@@ -319,7 +332,8 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                         ),
                         SizedBox(width: padding),
                         _PlayButton(
-                            isPlaying: widget.videoController.value.isPlaying,
+                            isPlaying: !_isChanging &&
+                                widget.videoController.value.isPlaying,
                             onPause: widget.onPause,
                             onPlay: widget.onPlay),
                         SizedBox(width: padding),
@@ -341,9 +355,7 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
               ),
               Slider(
                 value: _playbackMarker,
-                onChanged: (value) {
-                  _setPlayingValue(value);
-                },
+                onChanged: (value) => _setPlayingValue(value),
               ),
             ],
           ),
