@@ -67,4 +67,7 @@ class TextManager {
   String get no => language == Language.en ? 'No' : 'Non';
 
   String get yes => language == Language.en ? 'Yes' : 'Oui';
+
+  String get unclassified =>
+      language == Language.en ? 'Unclassified' : 'Non classés';
 }

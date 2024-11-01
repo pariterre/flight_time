@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flight_time/models/file_manager.dart';
+import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast_io.dart';
@@ -25,7 +26,7 @@ class Athletes {
     Athletes._instance = Athletes._();
     Athletes._instance!._initializeDataBase();
 
-    await _deleteCacheFolder();
+    //await _deleteCacheFolder();
 
     while (!Athletes._instance!.isReady) {
       // wait for the database to be ready
@@ -36,15 +37,6 @@ class Athletes {
   ///
   /// Return an immutable list of athletes
   List<Athlete> get athletes => List.unmodifiable(_athletes);
-
-  ///
-  /// Delete the cache folder where the videos are stored
-  static Future<void> _deleteCacheFolder() async {
-    final cacheDir = Directory(await FileManager.cacheFolder);
-    if (await cacheDir.exists()) {
-      await cacheDir.delete(recursive: true);
-    }
-  }
 
   Future<void> _initializeDataBase() async {
     // open the database
@@ -59,40 +51,22 @@ class Athletes {
   }
 
   ///
-  /// This method checks for loose videos in the cache folder and in the data folder
-  /// If a video is found in the cache folder, it throws. This is currently for
-  /// debugging purposes only, but at some point, it could be used to recover
-  /// videos that were not properly added to the database
-  Future<void> checkForLooseVideos() async {
-    if (!isReady) throw StateError('Database is not ready');
+  /// This method checks for unclassified videos in the cache folder.
+  /// If a video is found, it adds it to the unclassified athlete in the metadata field.
+  Future<Athlete> checkForUnclassifiedVideos() async {
+    final unclassified = Athlete(name: TextManager.instance.unclassified);
 
     // Look at videos that are in the cache folder. They do not belong to any athlete yet
     final cacheDir = Directory(await FileManager.cacheFolder);
     final files = await cacheDir.list().toList();
     for (var file in files) {
-      if (file is File) {
-        throw 'Just found a loose video in the cache folder';
+      // TODO Confirm .temp is the right one in iOS
+      if (file is File && extension(file.path) == '.temp') {
+        unclassified._videoMetaDataPaths.add(file.path);
       }
     }
 
-    // Check in the data folder for each athlete for videos that do not have a pairing metadata file
-    for (var athlete in _athletes) {
-      final athleteDir =
-          Directory(join(await FileManager.dataFolder, athlete.name));
-      if (!await athleteDir.exists()) continue;
-
-      final files = await athleteDir.list().toList();
-      for (var file in files) {
-        if (file is File &&
-            extension(file.path) == '.mp4' &&
-            !await File(join(athleteDir.path,
-                    '${basenameWithoutExtension(file.path)}.meta'))
-                .exists()) {
-          throw 'Just found a loose video in the data folder';
-        }
-      }
-    }
-    return;
+    return unclassified;
   }
 
   Future<String> databasePath() async =>
@@ -105,11 +79,11 @@ class Athletes {
 
   ///
   /// Get an athlete from their name, adds it if it does not exist
-  Athlete athleteFromNameOrAdd(String name) {
+  Future<Athlete> athleteFromNameOrAdd(String name) async {
     try {
       return athleteFromName(name);
     } on StateError {
-      addAthlete(name);
+      await addAthlete(name);
       return athleteFromName(name);
     }
   }
@@ -154,6 +128,13 @@ class Athletes {
   Future<void> removeVideo(VideoMetaData metaData) async {
     if (!isReady) throw StateError('Database is not ready');
 
+    if (metaData.isFromCorrupted) {
+      // This is a special case where the actual video is stored in the metadata path
+      // but nothing else exist (neither the athlete nor the metadata)
+      await File(metaData.videoPath).delete();
+      return;
+    }
+
     final athlete = metaData.athlete;
 
     // If the video does not exist, then it is not possible to remove it
@@ -171,7 +152,7 @@ class Athletes {
     await _store.record(athlete.name).put(_database!, athlete.toJson());
 
     // Remove file from disk
-    File(metaData.videoPath).delete();
+    await File(metaData.videoPath).delete();
   }
 
   ///

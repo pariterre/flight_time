@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/models/text_manager.dart';
 
 class VideoMetaData {
   final Athlete athlete;
@@ -15,6 +16,8 @@ class VideoMetaData {
   final Duration timeJumpStarts;
   final Duration timeJumpEnds;
 
+  bool get isFromCorrupted => athlete.name == TextManager.instance.unclassified;
+
   VideoMetaData({
     required this.athlete,
     required this.trialName,
@@ -25,6 +28,16 @@ class VideoMetaData {
     required this.timeJumpStarts,
     required this.timeJumpEnds,
   });
+
+  VideoMetaData.fromCorruptedVideo({
+    required this.athlete,
+    required this.trialName,
+    required this.baseFolder,
+  })  : duration = Duration.zero,
+        creationDate = DateTime(0),
+        lastModified = DateTime(0),
+        timeJumpStarts = Duration.zero,
+        timeJumpEnds = Duration.zero;
 
   VideoMetaData copyWith({
     DateTime? lastModified,
@@ -74,7 +87,9 @@ class VideoMetaData {
     );
   }
 
-  String get videoPath => '${baseFolder.path}/$trialName.mp4';
+  // TODO Confirm .temp is the right one in iOS
+  String get videoPath =>
+      '${baseFolder.path}/$trialName.${isFromCorrupted ? 'temp' : 'mp4'}';
   String get path => '${baseFolder.path}/$trialName.meta';
 
   ///

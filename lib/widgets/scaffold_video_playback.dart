@@ -5,7 +5,6 @@ import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
-import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -26,7 +25,8 @@ class ScaffoldVideoPlayback extends StatefulWidget {
 }
 
 class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
-  bool get _isVideoNew => _metaData == null;
+  bool get _isVideoNew =>
+      _metaData == null || (_metaData?.isFromCorrupted ?? false);
   late VideoMetaData? _metaData = widget.videoMetaData;
 
   bool _canPop = false;
@@ -118,7 +118,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 
     _metaData = (isVideoNew
         ? VideoMetaData(
-            athlete: Athletes.instance.athleteFromNameOrAdd(_athleteName!),
+            athlete:
+                await Athletes.instance.athleteFromNameOrAdd(_athleteName!),
             trialName: _trialName!,
             baseFolder:
                 Directory('${await FileManager.dataFolder}/${_athleteName!}'),
@@ -152,11 +153,6 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 
   @override
   Widget build(BuildContext context) {
-    final videoSize = computeSize(context,
-        videoSize: Size(widget.controller.value.size.width,
-            widget.controller.value.size.height),
-        videoAspectRatio: widget.controller.value.aspectRatio);
-
     return PopScope(
       canPop: _canPop,
       onPopInvokedWithResult: (didPop, result) => _managePop(),
@@ -192,11 +188,17 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 color: Colors.black,
               ),
               Center(
-                child: SizedBox(
-                    width: videoSize.width,
-                    height: videoSize.height,
-                    child: Transform.rotate(
-                        angle: pi / 2, child: VideoPlayer(widget.controller))),
+                child: Transform.rotate(
+                  angle: pi / 2,
+                  child: Transform.scale(
+                    scale: widget.controller.value.size.height /
+                        widget.controller.value.size.width,
+                    child: AspectRatio(
+                      aspectRatio: 1 / widget.controller.value.aspectRatio,
+                      child: VideoPlayer(widget.controller),
+                    ),
+                  ),
+                ),
               ),
             ],
           )),

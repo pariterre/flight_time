@@ -1,7 +1,6 @@
 import 'package:camera/camera.dart';
-import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/models/text_manager.dart';
-import 'package:flight_time/widgets/helpers.dart';
+import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
 import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
@@ -64,10 +63,6 @@ class _CameraPageState extends State<CameraPage> {
     if (_isLoading) {
       return WaitingScreen();
     } else {
-      final videoSize = computeSize(context,
-          videoSize: _cameraController.value.previewSize!,
-          videoAspectRatio: _cameraController.value.aspectRatio);
-
       return Scaffold(
         appBar: AppBar(title: Text(TextManager.instance.recordingVideo)),
         drawer: MainDrawer(),
@@ -101,9 +96,8 @@ class _CameraPageState extends State<CameraPage> {
                 width: double.infinity,
                 height: double.infinity,
               ),
-              SizedBox(
-                  width: videoSize.width,
-                  height: videoSize.height,
+              AspectRatio(
+                  aspectRatio: 1 / _cameraController.value.aspectRatio,
                   child: CameraPreview(_cameraController)),
             ],
           ),
