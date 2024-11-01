@@ -17,3 +17,13 @@ Size computeSize(context,
   return Size(videoSize.width / sizeFactor,
       videoSize.height * videoAspectRatio / sizeFactor);
 }
+
+Duration fligthTime(
+        {required Duration timeJumpStarts, required Duration timeJumpEnds}) =>
+    timeJumpEnds - timeJumpStarts;
+
+double flightHeight({required Duration fligthTime}) =>
+    9.81 *
+    (fligthTime.inMilliseconds / 1000) *
+    (fligthTime.inMilliseconds / 1000) /
+    8.0;

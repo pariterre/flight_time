@@ -5,6 +5,7 @@ import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/animated_expanding_card.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path_package;
@@ -229,7 +230,7 @@ class _VideoMetaDataListTile extends StatelessWidget {
                     Text(
                       isHeader
                           ? TextManager.instance.flightTime
-                          : '${(metaData!.fligthTime.inMilliseconds / 1000).toStringAsFixed(3)} s',
+                          : '${(fligthTime(timeJumpStarts: metaData!.timeJumpStarts, timeJumpEnds: metaData!.timeJumpEnds).inMilliseconds / 1000).toStringAsFixed(3)} s',
                       style: TextStyle(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
@@ -243,7 +244,7 @@ class _VideoMetaDataListTile extends StatelessWidget {
                     Text(
                       isHeader
                           ? TextManager.instance.flightHeight
-                          : '${(metaData!.flightHeight * 100).toStringAsFixed(1)} cm',
+                          : '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: metaData!.timeJumpStarts, timeJumpEnds: metaData!.timeJumpEnds)) * 100).toStringAsFixed(1)} cm',
                       style: TextStyle(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),

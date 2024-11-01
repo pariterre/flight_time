@@ -5,6 +5,7 @@ import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -197,6 +198,37 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                       aspectRatio: 1 / widget.controller.value.aspectRatio,
                       child: VideoPlayer(widget.controller),
                     ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 24,
+                top: 24,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('${TextManager.instance.flightTime}: '),
+                          Text('${TextManager.instance.flightHeight}: '),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              '${(fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end).inMilliseconds / 1000).toStringAsFixed(3)} s'),
+                          Text(
+                              '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end)) * 100).toStringAsFixed(1)} cm'),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

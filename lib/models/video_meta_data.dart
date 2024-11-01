@@ -117,11 +117,4 @@ class VideoMetaData {
       await File(path).delete();
     }
   }
-
-  Duration get fligthTime => timeJumpEnds - timeJumpStarts;
-  double get flightHeight =>
-      9.81 *
-      (fligthTime.inMilliseconds / 1000) *
-      (fligthTime.inMilliseconds / 1000) /
-      8.0;
 }
