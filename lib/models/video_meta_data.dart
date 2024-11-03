@@ -87,9 +87,7 @@ class VideoMetaData {
     );
   }
 
-  // TODO Confirm .temp is the right one in iOS
-  String get videoPath =>
-      '${baseFolder.path}/$trialName.${isFromCorrupted ? 'temp' : 'mp4'}';
+  String get videoPath => '${baseFolder.path}/$trialName.mp4';
   String get path => '${baseFolder.path}/$trialName.meta';
 
   ///

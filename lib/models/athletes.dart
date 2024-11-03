@@ -60,8 +60,7 @@ class Athletes {
     final cacheDir = Directory(await FileManager.cacheFolder);
     final files = await cacheDir.list().toList();
     for (var file in files) {
-      // TODO Confirm .temp is the right one in iOS
-      if (file is File && extension(file.path) == '.temp') {
+      if (file is File && extension(file.path) == '.mp4') {
         unclassified._videoMetaDataPaths.add(file.path);
       }
     }

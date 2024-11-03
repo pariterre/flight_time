@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/file_manager.dart';
@@ -189,16 +188,9 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 color: darkBlue,
               ),
               Center(
-                child: Transform.rotate(
-                  angle: pi / 2,
-                  child: Transform.scale(
-                    scale: widget.controller.value.size.height /
-                        widget.controller.value.size.width,
-                    child: AspectRatio(
-                      aspectRatio: 1 / widget.controller.value.aspectRatio,
-                      child: VideoPlayer(widget.controller),
-                    ),
-                  ),
+                child: AspectRatio(
+                  aspectRatio: 1 / widget.controller.value.aspectRatio,
+                  child: VideoPlayer(widget.controller),
                 ),
               ),
               Positioned(

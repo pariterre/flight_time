@@ -1,109 +1,34 @@
-import 'package:camera/camera.dart';
+import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/screens/playback_page.dart';
-import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
-import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-class CameraPage extends StatefulWidget {
+class CameraPage extends StatelessWidget {
   const CameraPage({super.key});
 
   static const routeName = '/camera-page';
 
-  @override
-  State<CameraPage> createState() => _CameraPageState();
-}
+  _recordVideo(context, MediaCapture mediaRecording) async {
+    final finishedRecording = !mediaRecording.isRecordingVideo;
+    if (!finishedRecording) return;
 
-class _CameraPageState extends State<CameraPage> {
-  bool _isLoading = true;
-  bool _isRecording = false;
-  late CameraController _cameraController;
-
-  @override
-  void initState() {
-    _initCamera();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _cameraController.dispose();
-    super.dispose();
-  }
-
-  _initCamera() async {
-    final cameras = await availableCameras();
-    final back = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back);
-    _cameraController = CameraController(back, ResolutionPreset.max);
-    await _cameraController.initialize();
-    setState(() => _isLoading = false);
-  }
-
-  _recordVideo() async {
-    if (_isRecording) {
-      final file = await _cameraController.stopVideoRecording();
-      setState(() => _isRecording = false);
-      if (!mounted) return;
-
-      Navigator.pushNamed(context, PlaybackPage.routeName,
-          arguments: {'file_path': file.path});
-    } else {
-      await _cameraController.prepareForVideoRecording();
-      await _cameraController.startVideoRecording();
-      await _cameraController
-          .lockCaptureOrientation(DeviceOrientation.portraitUp);
-      setState(() => _isRecording = true);
-    }
+    Navigator.pushNamed(context, PlaybackPage.routeName,
+        arguments: {'file_path': mediaRecording.captureRequest.path});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return WaitingScreen();
-    } else {
-      return Scaffold(
-        appBar: AppBar(title: Text(TextManager.instance.recordingVideo)),
-        drawer: MainDrawer(),
-        bottomNavigationBar: Container(
-          color: Theme.of(context).appBarTheme.backgroundColor,
-          width: double.infinity,
-          height: 60,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _isRecording
-                  ? Colors.red.withOpacity(0.5)
-                  : Theme.of(context)
-                      .appBarTheme
-                      .foregroundColor!
-                      .withOpacity(0.6),
-            ),
-            child: IconButton(
-              color: Colors.red,
-              icon: Icon(_isRecording ? Icons.stop : Icons.circle),
-              onPressed: () => _recordVideo(),
-            ),
-          ),
-        ),
-        body: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                color: darkBlue,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-              AspectRatio(
-                  aspectRatio: 1 / _cameraController.value.aspectRatio,
-                  child: CameraPreview(_cameraController)),
-            ],
-          ),
-        ),
-      );
-    }
+    return Scaffold(
+      appBar: AppBar(title: Text(TextManager.instance.recordingVideo)),
+      drawer: MainDrawer(),
+      body: CameraAwesomeBuilder.awesome(
+        saveConfig: SaveConfig.video(),
+        sensorConfig:
+            SensorConfig.single(sensor: Sensor.position(SensorPosition.back)),
+        onMediaCaptureEvent: (mediaRecording) =>
+            _recordVideo(context, mediaRecording),
+      ),
+    );
   }
 }

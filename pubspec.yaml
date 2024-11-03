@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.11.0+2
+  camerawesome: ^2.1.0
   video_player: ^2.9.2
   cupertino_icons: ^1.0.8
   sembast: ^3.7.5

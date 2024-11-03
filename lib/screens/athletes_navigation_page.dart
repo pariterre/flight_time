@@ -77,7 +77,16 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                 children: [
                   if (_unclassified!.videoMetaDataPaths.isNotEmpty)
                     AnimatedExpandingCard(
-                      header: ListTile(title: Text(_unclassified!.name)),
+                      header: ListTile(
+                          title: Text(
+                        _unclassified!.name,
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .elevatedButtonTheme
+                                .style!
+                                .foregroundColor!
+                                .resolve({})),
+                      )),
                       headerBackgroundColor: Theme.of(context).primaryColor,
                       child: SizedBox(
                         child: Column(

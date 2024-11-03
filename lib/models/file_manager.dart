@@ -10,7 +10,7 @@ class FileManager {
       : (await getApplicationDocumentsDirectory()).path;
 
   static Future<String> get cacheFolder async =>
-      (await getApplicationCacheDirectory()).path;
+      '${(await getApplicationCacheDirectory()).path}/camerawesome';
 
   static Future<String> get dataFolder async {
     final folder = '${await baseFolder}/data';
