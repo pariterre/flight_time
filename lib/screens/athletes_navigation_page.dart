@@ -7,6 +7,7 @@ import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/animated_expanding_card.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
+import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path_package;
 
@@ -71,9 +72,7 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
         ),
         drawer: MainDrawer(),
         body: _unclassified == null
-            ? Container(
-                color: darkBlue,
-                child: Center(child: CircularProgressIndicator(color: orange)))
+            ? WaitingScreen()
             : Column(
                 children: [
                   if (_unclassified!.videoMetaDataPaths.isNotEmpty)
