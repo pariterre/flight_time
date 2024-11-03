@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/screens/playback_page.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
 import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class _CameraPageState extends State<CameraPage> {
             alignment: Alignment.center,
             children: [
               Container(
-                color: Colors.black,
+                color: darkBlue,
                 width: double.infinity,
                 height: double.infinity,
               ),

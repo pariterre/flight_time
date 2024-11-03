@@ -186,7 +186,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
               Container(
                 width: double.infinity,
                 height: double.infinity,
-                color: Colors.black,
+                color: darkBlue,
               ),
               Center(
                 child: Transform.rotate(
@@ -204,36 +204,66 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
               Positioned(
                 left: 24,
                 top: 24,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text('${TextManager.instance.flightTime}: '),
-                          Text('${TextManager.instance.flightHeight}: '),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              '${(fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end).inMilliseconds / 1000).toStringAsFixed(3)} s'),
-                          Text(
-                              '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end)) * 100).toStringAsFixed(1)} cm'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                child: _FightTime(videoPlaybackWatcher: _videoPlaybackWatcher),
               ),
             ],
           )),
+    );
+  }
+}
+
+class _FightTime extends StatelessWidget {
+  const _FightTime({required _VideoPlaybackWatcher videoPlaybackWatcher})
+      : _videoPlaybackWatcher = videoPlaybackWatcher;
+
+  final _VideoPlaybackWatcher _videoPlaybackWatcher;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = TextStyle(
+        color: Theme.of(context)
+            .elevatedButtonTheme
+            .style!
+            .foregroundColor!
+            .resolve({}));
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .elevatedButtonTheme
+            .style!
+            .backgroundColor!
+            .resolve({})!.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${TextManager.instance.flightTime}: ',
+                style: textStyle,
+              ),
+              Text('${TextManager.instance.flightHeight}: ', style: textStyle),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${(fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end).inMilliseconds / 1000).toStringAsFixed(3)} s',
+                style: textStyle,
+              ),
+              Text(
+                '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end)) * 100).toStringAsFixed(1)} cm',
+                style: textStyle,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -399,6 +429,9 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
   }
 }
 
+const playbackButtonColor = Colors.white;
+const playbackDisabledButtonColor = Colors.white30;
+
 class _PlayButton extends StatelessWidget {
   const _PlayButton(
       {required this.isPlaying, required this.onPause, required this.onPlay});
@@ -409,21 +442,19 @@ class _PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color:
-              Theme.of(context).appBarTheme.foregroundColor!.withOpacity(0.6),
-        ),
-        child: isPlaying
-            ? IconButton(
-                icon: const Icon(Icons.pause),
-                onPressed: onPause,
-              )
-            : IconButton(
-                icon: const Icon(Icons.play_arrow),
-                onPressed: onPlay,
-              ));
+    return GestureDetector(
+      onTap: isPlaying ? onPause : onPlay,
+      child: Container(
+          width: 45,
+          height: 45,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: playbackButtonColor,
+          ),
+          child: isPlaying
+              ? const Icon(Icons.pause)
+              : const Icon(Icons.play_arrow)),
+    );
   }
 }
 
@@ -441,11 +472,8 @@ class _MarkerButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: onTap == null
-                ? Colors.black.withOpacity(0.2)
-                : Theme.of(context)
-                    .appBarTheme
-                    .foregroundColor!
-                    .withOpacity(0.6),
+                ? playbackDisabledButtonColor
+                : playbackButtonColor,
           ),
           child: Padding(
             padding: const EdgeInsets.all(12.0),

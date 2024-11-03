@@ -71,7 +71,9 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
         ),
         drawer: MainDrawer(),
         body: _unclassified == null
-            ? Center(child: CircularProgressIndicator())
+            ? Container(
+                color: darkBlue,
+                child: Center(child: CircularProgressIndicator(color: orange)))
             : Column(
                 children: [
                   if (_unclassified!.videoMetaDataPaths.isNotEmpty)
@@ -134,9 +136,21 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                         return Column(
                           children: [
                             AnimatedExpandingCard(
-                              header: ListTile(title: Text(athlete.name)),
-                              headerBackgroundColor:
-                                  Theme.of(context).primaryColor,
+                              header: ListTile(
+                                  title: Text(
+                                athlete.name,
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .elevatedButtonTheme
+                                        .style!
+                                        .foregroundColor!
+                                        .resolve({})),
+                              )),
+                              headerBackgroundColor: Theme.of(context)
+                                  .elevatedButtonTheme
+                                  .style!
+                                  .backgroundColor!
+                                  .resolve({}),
                               child: SizedBox(
                                 child: Column(
                                   children: [

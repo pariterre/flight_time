@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/scaffold_video_playback.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -58,9 +59,9 @@ class _PlaybackPageState extends State<PlaybackPage> {
         : Scaffold(
             appBar: AppBar(title: Text(TextManager.instance.preparingTrial)),
             body: Container(
-              color: Colors.black,
+              color: darkBlue,
               child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(color: orange),
               ),
             ));
   }

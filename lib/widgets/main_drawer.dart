@@ -1,6 +1,7 @@
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/screens/athletes_navigation_page.dart';
 import 'package:flight_time/screens/camera_page.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 
 class MainDrawer extends StatelessWidget {
@@ -13,7 +14,7 @@ class MainDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-              decoration: BoxDecoration(color: Colors.teal),
+              decoration: BoxDecoration(color: darkBlue),
               child: Text(
                 TextManager.instance.title,
                 style:
@@ -30,6 +31,7 @@ class MainDrawer extends StatelessWidget {
               Navigator.pushReplacementNamed(context, CameraPage.routeName);
             },
           ),
+          Divider(),
           ListTile(
             title: Text(TextManager.instance.playback),
             onTap: () {
@@ -37,6 +39,7 @@ class MainDrawer extends StatelessWidget {
                   context, AthletesNavigationPage.routeName);
             },
           ),
+          Divider(),
         ],
       ),
     );

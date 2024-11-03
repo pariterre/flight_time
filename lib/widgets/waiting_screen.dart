@@ -1,3 +1,4 @@
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 
 class WaitingScreen extends StatelessWidget {
@@ -6,9 +7,9 @@ class WaitingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black,
+      color: darkBlue,
       child: const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+        child: CircularProgressIndicator(color: orange),
       ),
     );
   }
