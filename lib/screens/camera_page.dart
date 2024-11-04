@@ -1,4 +1,5 @@
 import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:camerawesome/pigeon.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
@@ -23,7 +24,11 @@ class CameraPage extends StatelessWidget {
       appBar: AppBar(title: Text(TextManager.instance.recordingVideo)),
       drawer: MainDrawer(),
       body: CameraAwesomeBuilder.awesome(
-        saveConfig: SaveConfig.video(),
+        saveConfig: SaveConfig.video(
+            videoOptions: VideoOptions(
+                // TODO Test if fps can be anything on iOS
+                enableAudio: false,
+                ios: CupertinoVideoOptions(fps: 300))),
         sensorConfig:
             SensorConfig.single(sensor: Sensor.position(SensorPosition.back)),
         onMediaCaptureEvent: (mediaRecording) =>
