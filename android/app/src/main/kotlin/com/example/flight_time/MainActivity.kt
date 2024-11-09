@@ -1,4 +1,4 @@
-package com.example.flight_time
+package net.pariterre.flight_time
 
 import io.flutter.embedding.android.FlutterActivity
 
