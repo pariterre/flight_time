@@ -7,18 +7,22 @@ import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_video_info/flutter_video_info.dart';
 import 'package:video_player/video_player.dart';
 
 class ScaffoldVideoPlayback extends StatefulWidget {
-  const ScaffoldVideoPlayback(
-      {super.key,
-      required this.controller,
-      required this.filePath,
-      this.videoMetaData});
+  const ScaffoldVideoPlayback({
+    super.key,
+    required this.controller,
+    required this.filePath,
+    this.videoMetaData,
+    required this.videoData,
+  });
 
   final VideoPlayerController controller;
   final String filePath;
   final VideoMetaData? videoMetaData;
+  final VideoData videoData;
 
   @override
   State<ScaffoldVideoPlayback> createState() => _ScaffoldVideoPlaybackState();
@@ -61,17 +65,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
     setState(() {});
   }
 
-  bool _isChangingTimeline = false;
-  void _onUpdateTimeline(double value) async {
-    if (_isChangingTimeline) return;
-    _isChangingTimeline = true;
-
-    final duration = widget.controller.value.duration;
-    final position = duration * value;
-    await widget.controller.seekTo(position);
-    await Future.delayed(Duration(milliseconds: 250));
+  void _onUpdateJumpTime() async {
     _canSave = true;
-    _isChangingTimeline = false;
     setState(() {});
   }
 
@@ -176,7 +171,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
             height: 150,
             child: _VideoPlaybackSlider(_videoPlaybackWatcher,
                 videoController: widget.controller,
-                onUpdateTimeline: _onUpdateTimeline,
+                onUpdateRanges: _onUpdateJumpTime,
                 onPlay: _onPlay,
                 onPause: _onPause),
           ),
@@ -189,7 +184,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
               ),
               Center(
                 child: AspectRatio(
-                  aspectRatio: 1 / widget.controller.value.aspectRatio,
+                  aspectRatio:
+                      widget.videoData.width! / widget.videoData.height!,
                   child: VideoPlayer(widget.controller),
                 ),
               ),
@@ -271,14 +267,14 @@ class _VideoPlaybackSlider extends StatefulWidget {
   const _VideoPlaybackSlider(
     this.watcher, {
     required this.videoController,
-    required this.onUpdateTimeline,
+    required this.onUpdateRanges,
     required this.onPlay,
     required this.onPause,
   });
 
   final _VideoPlaybackWatcher watcher;
   final VideoPlayerController videoController;
-  final Function(double) onUpdateTimeline;
+  final Function() onUpdateRanges;
   final Function() onPlay;
   final Function() onPause;
 
@@ -314,15 +310,11 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
   }
 
   bool _isChanging = false;
-  void _setPlayingValue(double value) async {
+  Future<void> _setPlayingValue(double value) async {
     if (_isChanging) return;
     _isChanging = true;
 
-    final duration = widget.videoController.value.duration;
-    final position =
-        Duration(milliseconds: (value * duration.inMilliseconds).toInt());
-    await widget.videoController.seekTo(position);
-    await Future.delayed(Duration(milliseconds: 250));
+    await _updateVideoFrame(value);
 
     _playbackMarker = value;
     _isChanging = false;
@@ -336,9 +328,10 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     }
   }
 
-  void _onUpdateRanges(RangeValues values) {
+  Future<void> _onUpdateRanges(RangeValues values) async {
     _focusOnFirst = _ranges.start != values.start;
-    widget.onUpdateTimeline(_focusOnFirst ? values.start : values.end);
+    await _updateVideoFrame(_focusOnFirst ? values.start : values.end);
+    widget.onUpdateRanges();
     _ranges = values;
 
     widget.watcher.start = Duration(
@@ -350,6 +343,14 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
             (values.end * widget.videoController.value.duration.inMilliseconds)
                 .toInt());
     setState(() {});
+  }
+
+  Future<void> _updateVideoFrame(double value) async {
+    final duration = widget.videoController.value.duration;
+    final position =
+        Duration(milliseconds: (value * duration.inMilliseconds).toInt());
+    await widget.videoController.seekTo(position);
+    await Future.delayed(Duration(milliseconds: 100));
   }
 
   @override
@@ -372,19 +373,29 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _MarkerButton(
-                      symbol: '|',
-                      onTap: _playbackMarker < _ranges.end
-                          ? () => _onUpdateRanges(
-                              RangeValues(_playbackMarker, _ranges.end))
-                          : null,
+                    Row(
+                      children: [
+                        _MarkerButton(
+                          symbol: '|',
+                          onTap: _playbackMarker < _ranges.end
+                              ? () => _onUpdateRanges(
+                                  RangeValues(_playbackMarker, _ranges.end))
+                              : null,
+                        ),
+                        SizedBox(width: padding),
+                        _MarkerButton(
+                          symbol: '<<',
+                          onTap: () => _setPlayingValue(_ranges.start),
+                        ),
+                      ],
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _MarkerButton(
                           symbol: '<',
-                          onTap: () => _setPlayingValue(_ranges.start),
+                          onTap: () =>
+                              _setPlayingValue(_playbackMarker - 0.001),
                         ),
                         SizedBox(width: padding),
                         _PlayButton(
@@ -395,16 +406,26 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                         SizedBox(width: padding),
                         _MarkerButton(
                           symbol: '>',
-                          onTap: () => _setPlayingValue(_ranges.end),
+                          onTap: () =>
+                              _setPlayingValue(_playbackMarker + 0.001),
                         ),
                       ],
                     ),
-                    _MarkerButton(
-                      symbol: '|',
-                      onTap: _playbackMarker > _ranges.start
-                          ? () => _onUpdateRanges(
-                              RangeValues(_ranges.start, _playbackMarker))
-                          : null,
+                    Row(
+                      children: [
+                        _MarkerButton(
+                          symbol: '>>',
+                          onTap: () => _setPlayingValue(_ranges.end),
+                        ),
+                        SizedBox(width: padding),
+                        _MarkerButton(
+                          symbol: '|',
+                          onTap: _playbackMarker > _ranges.start
+                              ? () => _onUpdateRanges(
+                                  RangeValues(_ranges.start, _playbackMarker))
+                              : null,
+                        ),
+                      ],
                     ),
                   ],
                 ),
