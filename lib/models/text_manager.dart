@@ -72,6 +72,9 @@ class TextManager {
       TranslatableString(en: 'Trial name', fr: 'Nom de l\'essai');
 
   // Show trial texts
+  TranslatableString get athletes =>
+      TranslatableString(en: 'Athletes', fr: 'Athlètes');
+
   TranslatableString get flightTime =>
       TranslatableString(en: 'Time', fr: 'Temps');
 
@@ -82,7 +85,49 @@ class TextManager {
       en: 'Do you really want to delete the video?',
       fr: 'Voulez-vous vraiment supprimer la vidéo?');
 
+  // The About page texts
+  TranslatableString get about =>
+      TranslatableString(en: 'About', fr: 'À propos');
+
+  TranslatableString get howTheAppWorks => TranslatableString(
+      en: 'How the app works', fr: 'Fonctionnement de l\'application');
+
+  TranslatableString get howTheAppWorksDetails => TranslatableString(
+        en: 'The app allows to film an athlete in action and to select the '
+            'take-off and landing moments. The app then calculates the flight '
+            'duration and the height reached. The videos can be saved and '
+            'viewed later.',
+        fr: 'L\'application permet de filmer un athlète en action et de sélectionner '
+            'l\'instant de décollage et d\'atterrisage. L\'application calcule alors '
+            'la durée du vol et la hauteur atteinte. Les vidéos peuvent être sauvegardées '
+            'et visionnées ultérieurement.',
+      );
+
+  TranslatableString get videoTutorialTitle =>
+      TranslatableString(en: 'Video tutorial', fr: 'Tutoriel vidéo');
+
+  TranslatableString get videoTutorialDetails => TranslatableString(
+        en: 'Here is a video that explains how to use the app.',
+        fr: 'Voici une vidéo qui explique comment utiliser l\'application.',
+      );
+
+  TranslatableString get videoTutorialLink => TranslatableString(
+        en: 'Coming soon',
+        fr: 'À venir',
+      );
+
+  TranslatableString get acknowledgementsTitle =>
+      TranslatableString(en: 'Acknowledgements', fr: 'Remerciements');
+
+  TranslatableString get acknowledgementsDetails => TranslatableString(
+        en: 'Coming soon',
+        fr: 'À venir',
+      );
+
   // Misc texts
+  TranslatableString get french => TranslatableString(en: 'Fr', fr: 'Fr');
+  TranslatableString get english => TranslatableString(en: 'En', fr: 'En');
+
   TranslatableString get areYouSureQuit => TranslatableString(
       en: 'Do you really want to quit?', fr: 'Voulez-vous vraiment quitter?');
 

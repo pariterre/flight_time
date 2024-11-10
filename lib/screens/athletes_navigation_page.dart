@@ -69,7 +69,8 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Athletes'),
+          title: TranslatableText(TextManager.instance.athletes,
+              style: appTitleStyle),
         ),
         drawer: MainDrawer(),
         body: _unclassified == null
@@ -81,7 +82,7 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                       header: ListTile(
                           title: TranslatableText(
                         TextManager.instance.unclassified,
-                        style: TextStyle(
+                        style: subtitleStyle.copyWith(
                             color: Theme.of(context)
                                 .elevatedButtonTheme
                                 .style!
@@ -148,7 +149,7 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                               header: ListTile(
                                   title: Text(
                                 athlete.name,
-                                style: TextStyle(
+                                style: subtitleStyle.copyWith(
                                     color: Theme.of(context)
                                         .elevatedButtonTheme
                                         .style!
@@ -254,7 +255,7 @@ class _VideoMetaDataListTile extends StatelessWidget {
                     : TranslatableString(
                         en: metaData!.trialName, fr: metaData!.trialName),
                 textAlign: TextAlign.left,
-                style: TextStyle(
+                style: mainTextStyle.copyWith(
                     fontWeight: isHeader ? FontWeight.bold : FontWeight.normal),
               ),
             ),
@@ -270,13 +271,13 @@ class _VideoMetaDataListTile extends StatelessWidget {
                           ? TextManager.instance.flightTime
                           : TranslatableString(
                               en: fligthTimeText!, fr: fligthTimeText),
-                      style: TextStyle(
+                      style: mainTextStyle.copyWith(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
                     ),
                     Text(
                       ' / ',
-                      style: TextStyle(
+                      style: mainTextStyle.copyWith(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
                     ),
@@ -285,7 +286,7 @@ class _VideoMetaDataListTile extends StatelessWidget {
                           ? TextManager.instance.flightHeight
                           : TranslatableString(
                               en: fligthHeightText!, fr: fligthHeightText),
-                      style: TextStyle(
+                      style: mainTextStyle.copyWith(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
                     ),

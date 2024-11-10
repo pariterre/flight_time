@@ -1,4 +1,5 @@
 import 'package:flight_time/models/text_manager.dart';
+import 'package:flight_time/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 
 class TranslatableText extends StatefulWidget {
@@ -31,6 +32,6 @@ class _TranslatableTextState extends State<TranslatableText> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(widget.text.value, style: widget.style);
+    return Text(widget.text.value, style: widget.style ?? mainTextStyle);
   }
 }

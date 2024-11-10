@@ -1,4 +1,5 @@
 import 'package:flight_time/models/athletes.dart';
+import 'package:flight_time/screens/about_page.dart';
 import 'package:flight_time/screens/athletes_navigation_page.dart';
 import 'package:flight_time/screens/camera_page.dart';
 import 'package:flight_time/screens/playback_page.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         PlaybackPage.routeName: (context) => const PlaybackPage(),
         AthletesNavigationPage.routeName: (context) =>
             const AthletesNavigationPage(),
+        AboutPage.routeName: (context) => const AboutPage(),
       },
     );
   }

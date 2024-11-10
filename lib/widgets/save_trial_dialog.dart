@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flight_time/models/athletes.dart';
 import 'package:flight_time/models/file_manager.dart';
 import 'package:flight_time/models/text_manager.dart';
+import 'package:flight_time/widgets/helpers.dart';
+import 'package:flight_time/widgets/translatable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -65,7 +67,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TextManager.instance.saveTrial.value),
+      title: TranslatableText(TextManager.instance.saveTrial),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -84,7 +86,9 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                 onFieldSubmitted: (value) => onSubmitted(),
                 decoration: InputDecoration(
                   labelText: TextManager.instance.athleteName.value,
+                  labelStyle: mainTextStyle,
                 ),
+                style: mainTextStyle,
               );
             },
             optionsViewBuilder: (context, onSelected, options) {
@@ -100,7 +104,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                         itemBuilder: (context, index) {
                           final name = options.elementAt(index);
                           return ListTile(
-                            title: Text(name),
+                            title: Text(name, style: mainTextStyle),
                             onTap: () {
                               onSelected(name);
                             },
@@ -117,7 +121,9 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
             focusNode: _trialFocusNode,
             decoration: InputDecoration(
               labelText: TextManager.instance.trialName.value,
+              labelStyle: mainTextStyle,
             ),
+            style: mainTextStyle,
             // Prevent user from editing the prefix
             onChanged: (value) {
               if (!value.startsWith(_trialPrefix)) {
@@ -151,7 +157,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop<String?>(),
-          child: Text(TextManager.instance.cancel.value),
+          child: TranslatableText(TextManager.instance.cancel),
         ),
         TextButton(
             onPressed: _canSave
@@ -163,7 +169,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                     });
                   }
                 : null,
-            child: Text(TextManager.instance.confirm.value)),
+            child: TranslatableText(TextManager.instance.confirm)),
       ],
     );
   }

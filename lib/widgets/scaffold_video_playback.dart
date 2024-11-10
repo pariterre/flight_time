@@ -155,7 +155,8 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
       onPopInvokedWithResult: (didPop, result) => _managePop(),
       child: Scaffold(
           appBar: AppBar(
-            title: TranslatableText(TextManager.instance.visualizingVideo),
+            title: TranslatableText(TextManager.instance.visualizingVideo,
+                style: appTitleStyle),
             elevation: 0,
             leading: IconButton(
                 onPressed: () => _areYouSureDialog(context),
@@ -210,7 +211,7 @@ class _FightTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(
+    final textStyle = mainTextStyle.copyWith(
         color: Theme.of(context)
             .elevatedButtonTheme
             .style!

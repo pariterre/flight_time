@@ -1,4 +1,5 @@
 import 'package:flight_time/models/text_manager.dart';
+import 'package:flight_time/screens/about_page.dart';
 import 'package:flight_time/screens/athletes_navigation_page.dart';
 import 'package:flight_time/screens/camera_page.dart';
 import 'package:flight_time/widgets/helpers.dart';
@@ -19,7 +20,8 @@ class MainDrawer extends StatelessWidget {
               decoration: BoxDecoration(
                   color: darkBlue,
                   image: const DecorationImage(
-                      image: AssetImage('assets/icons/app_icon_ios.png'),
+                      image:
+                          AssetImage('assets/icons/patinage_quebec_logo.png'),
                       opacity: 0.3)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -27,14 +29,19 @@ class MainDrawer extends StatelessWidget {
                 children: [
                   TranslatableText(
                     TextManager.instance.title,
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                    style: subtitleStyle.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   SwitchLanguage(),
                 ],
               )),
           ListTile(
-            title: TranslatableText(TextManager.instance.camera),
+            title: TranslatableText(
+              TextManager.instance.camera,
+              style: subtitleStyle,
+            ),
             onTap: () {
               if (ModalRoute.of(context)!.settings.name ==
                   CameraPage.routeName) {
@@ -46,10 +53,19 @@ class MainDrawer extends StatelessWidget {
           ),
           Divider(),
           ListTile(
-            title: TranslatableText(TextManager.instance.playback),
+            title: TranslatableText(TextManager.instance.playback,
+                style: subtitleStyle),
             onTap: () {
               Navigator.pushReplacementNamed(
                   context, AthletesNavigationPage.routeName);
+            },
+          ),
+          Divider(),
+          ListTile(
+            title: TranslatableText(TextManager.instance.about,
+                style: subtitleStyle),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AboutPage.routeName);
             },
           ),
           Divider(),

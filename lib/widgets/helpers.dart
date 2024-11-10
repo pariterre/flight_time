@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 const darkBlue = Color.fromRGBO(0x00, 0x1f, 0x3b, 1);
 const lightBlue = Color.fromRGBO(0x05, 0x93, 0xee, 1);
@@ -35,3 +36,7 @@ double flightHeight({required Duration fligthTime}) =>
     (fligthTime.inMilliseconds / 1000) *
     (fligthTime.inMilliseconds / 1000) /
     8.0;
+
+TextStyle get appTitleStyle => GoogleFonts.mateSc();
+TextStyle get subtitleStyle => GoogleFonts.mateSc();
+TextStyle get mainTextStyle => GoogleFonts.lato();
