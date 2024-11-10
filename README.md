@@ -30,3 +30,15 @@ Add these on ios/Runner/Info.plist:
 
 <key>NSCameraUsageDescription</key>
 <string>Your own description</string>
+
+
+
+## Generate icons
+
+To generate the icons, run:
+
+    dart run flutter_launcher_icons
+
+### Android
+
+    For some unknown reason, the folder `android/app/src/main/res/mipmap-anydpi-26` creates a transparent icon on Android 8.0.0. To fix this, delete the folder `android/app/src/main/res/mipmap-anydpi-26`.
