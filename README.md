@@ -42,3 +42,28 @@ To generate the icons, run:
 ### Android
 
     For some unknown reason, the folder `android/app/src/main/res/mipmap-anydpi-26` creates a transparent icon on Android 8.0.0. To fix this, delete the folder `android/app/src/main/res/mipmap-anydpi-26`.
+
+### iOS
+
+    Nothing special to do.
+
+## Building the app
+
+### Android
+
+To build the app, run the following command:
+
+    flutter build appbundle
+
+If the signing process fails, you probably forgot to add the `key.properties` file. Create a file named `key.properties` in the `android` folder with the following content:
+
+    storeFile=...
+    storePassword=...  
+    keyAlias=s2mjumpapp
+    keyPassword=...
+
+If you don't have the `storeFile`, you must request it from the project owner.
+
+### iOS
+
+    flutter build ios --release
