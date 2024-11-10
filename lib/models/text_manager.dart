@@ -1,4 +1,5 @@
 import 'package:flight_time/models/custom_callback.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum Language { en, fr }
 
@@ -15,7 +16,16 @@ class TextManager {
   // Prepare the singleton
   static final TextManager _singleton = TextManager._();
   static TextManager get instance => _singleton;
-  TextManager._();
+  TextManager._() {
+    SharedPreferences.getInstance().then((prefs) {
+      final lang = prefs.getString('language');
+      if (lang == 'en') {
+        language = Language.en;
+      } else if (lang == 'fr') {
+        language = Language.fr;
+      }
+    });
+  }
 
   // The current language
   Language _language = Language.fr;
@@ -23,6 +33,9 @@ class TextManager {
   set language(Language value) {
     _language = value;
     onLanguageChanged.notifyListeners();
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('language', value.toString().split('.').last);
+    });
   }
 
   final onLanguageChanged = CustomCallback<void Function()>();
