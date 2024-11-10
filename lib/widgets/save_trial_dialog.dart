@@ -65,7 +65,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TextManager.instance.saveTrial),
+      title: Text(TextManager.instance.saveTrial.value),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -83,7 +83,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                 focusNode: node,
                 onFieldSubmitted: (value) => onSubmitted(),
                 decoration: InputDecoration(
-                  labelText: TextManager.instance.athleteName,
+                  labelText: TextManager.instance.athleteName.value,
                 ),
               );
             },
@@ -116,7 +116,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
             controller: _trialNameController,
             focusNode: _trialFocusNode,
             decoration: InputDecoration(
-              labelText: TextManager.instance.trialName,
+              labelText: TextManager.instance.trialName.value,
             ),
             // Prevent user from editing the prefix
             onChanged: (value) {
@@ -151,7 +151,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop<String?>(),
-          child: Text(TextManager.instance.cancel),
+          child: Text(TextManager.instance.cancel.value),
         ),
         TextButton(
             onPressed: _canSave
@@ -163,7 +163,7 @@ class _SaveTrialDialogState extends State<SaveTrialDialog> {
                     });
                   }
                 : null,
-            child: Text(TextManager.instance.confirm)),
+            child: Text(TextManager.instance.confirm.value)),
       ],
     );
   }

@@ -16,7 +16,8 @@ class VideoMetaData {
   final Duration timeJumpStarts;
   final Duration timeJumpEnds;
 
-  bool get isFromCorrupted => athlete.name == TextManager.instance.unclassified;
+  bool get isFromCorrupted =>
+      athlete.name == TextManager.instance.unclassified.en;
 
   VideoMetaData({
     required this.athlete,

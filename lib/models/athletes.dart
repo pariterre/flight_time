@@ -54,17 +54,20 @@ class Athletes {
   /// This method checks for unclassified videos in the cache folder.
   /// If a video is found, it adds it to the unclassified athlete in the metadata field.
   Future<Athlete> checkForUnclassifiedVideos() async {
-    final unclassified = Athlete(name: TextManager.instance.unclassified);
+    final unclassified = Athlete(name: TextManager.instance.unclassified.en);
 
     // Look at videos that are in the cache folder. They do not belong to any athlete yet
     final cacheDir = Directory(await FileManager.cacheFolder);
-    final files = await cacheDir.list().toList();
-    for (var file in files) {
-      if (file is File && extension(file.path) == '.mp4') {
-        unclassified._videoMetaDataPaths.add(file.path);
+    try {
+      final files = await cacheDir.list().toList();
+      for (var file in files) {
+        if (file is File && extension(file.path) == '.mp4') {
+          unclassified._videoMetaDataPaths.add(file.path);
+        }
       }
+    } catch (e) {
+      // Do nothing and return what we have so far
     }
-
     return unclassified;
   }
 

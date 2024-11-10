@@ -7,6 +7,7 @@ import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/animated_expanding_card.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
+import 'package:flight_time/widgets/translatable_text.dart';
 import 'package:flight_time/widgets/waiting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path_package;
@@ -38,15 +39,15 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
     final response = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(TextManager.instance.areYouSureDelete),
+        title: TranslatableText(TextManager.instance.areYouSureDelete),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(TextManager.instance.cancel),
+            child: TranslatableText(TextManager.instance.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(TextManager.instance.quit),
+            child: TranslatableText(TextManager.instance.quit),
           ),
         ],
       ),
@@ -78,8 +79,8 @@ class _AthletesNavigationPageState extends State<AthletesNavigationPage> {
                   if (_unclassified!.videoMetaDataPaths.isNotEmpty)
                     AnimatedExpandingCard(
                       header: ListTile(
-                          title: Text(
-                        _unclassified!.name,
+                          title: TranslatableText(
+                        TextManager.instance.unclassified,
                         style: TextStyle(
                             color: Theme.of(context)
                                 .elevatedButtonTheme
@@ -226,6 +227,18 @@ class _VideoMetaDataListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isHeader = metaData == null;
 
+    final fligthTimeDuration = metaData == null || isFromCorrupted
+        ? null
+        : fligthTime(
+            timeJumpStarts: metaData!.timeJumpStarts,
+            timeJumpEnds: metaData!.timeJumpEnds);
+    final fligthTimeText = metaData == null || isFromCorrupted
+        ? null
+        : '${(fligthTimeDuration!.inMilliseconds / 1000).toStringAsFixed(3)} s';
+    final fligthHeightText = metaData == null || isFromCorrupted
+        ? null
+        : '${(flightHeight(fligthTime: fligthTimeDuration!) * 100).toStringAsFixed(1)} cm';
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -235,8 +248,11 @@ class _VideoMetaDataListTile extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                isHeader ? TextManager.instance.trialName : metaData!.trialName,
+              child: TranslatableText(
+                isHeader
+                    ? TextManager.instance.trialName
+                    : TranslatableString(
+                        en: metaData!.trialName, fr: metaData!.trialName),
                 textAlign: TextAlign.left,
                 style: TextStyle(
                     fontWeight: isHeader ? FontWeight.bold : FontWeight.normal),
@@ -249,10 +265,11 @@ class _VideoMetaDataListTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    TranslatableText(
                       isHeader
                           ? TextManager.instance.flightTime
-                          : '${(fligthTime(timeJumpStarts: metaData!.timeJumpStarts, timeJumpEnds: metaData!.timeJumpEnds).inMilliseconds / 1000).toStringAsFixed(3)} s',
+                          : TranslatableString(
+                              en: fligthTimeText!, fr: fligthTimeText),
                       style: TextStyle(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
@@ -263,10 +280,11 @@ class _VideoMetaDataListTile extends StatelessWidget {
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),
                     ),
-                    Text(
+                    TranslatableText(
                       isHeader
                           ? TextManager.instance.flightHeight
-                          : '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: metaData!.timeJumpStarts, timeJumpEnds: metaData!.timeJumpEnds)) * 100).toStringAsFixed(1)} cm',
+                          : TranslatableString(
+                              en: fligthHeightText!, fr: fligthHeightText),
                       style: TextStyle(
                           fontWeight:
                               isHeader ? FontWeight.bold : FontWeight.normal),

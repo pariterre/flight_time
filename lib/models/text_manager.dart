@@ -1,4 +1,15 @@
+import 'package:flight_time/models/custom_callback.dart';
+
 enum Language { en, fr }
+
+class TranslatableString {
+  final String en;
+  final String fr;
+
+  TranslatableString({required this.en, required this.fr});
+
+  String get value => TextManager.instance.language == Language.en ? en : fr;
+}
 
 class TextManager {
   // Prepare the singleton
@@ -7,67 +18,78 @@ class TextManager {
   TextManager._();
 
   // The current language
-  Language language = Language.fr;
+  Language _language = Language.fr;
+  Language get language => _language;
+  set language(Language value) {
+    _language = value;
+    onLanguageChanged.notifyListeners();
+  }
+
+  final onLanguageChanged = CustomCallback<void Function()>();
 
   // The title
-  String get title => language == Language.en ? 'Flight Time' : 'Temps de vol';
+  TranslatableString get title =>
+      TranslatableString(en: 'Flight Time', fr: 'Temps de vol');
 
   // The MainDrawer related texts
-  String get camera => language == Language.en ? 'Camera' : 'Caméra';
+  TranslatableString get camera =>
+      TranslatableString(en: 'Camera', fr: 'Caméra');
 
-  String get playback => language == Language.en ? 'Playback' : 'Lecture';
+  TranslatableString get playback =>
+      TranslatableString(en: 'Playback', fr: 'Lecture');
 
   // The Recording related texts
-  String get recordingVideo =>
-      language == Language.en ? 'Video recording' : 'Enregistrement video';
+  TranslatableString get recordingVideo =>
+      TranslatableString(en: 'Video recording', fr: 'Enregistrement video');
 
-  String get preparingTrial => language == Language.en
-      ? 'Preparing the video'
-      : 'Préparation de la vidéo';
+  TranslatableString get preparingTrial => TranslatableString(
+      en: 'Preparing the video', fr: 'Préparation de la vidéo');
 
-  String get visualizingVideo => language == Language.en
-      ? 'Visualizing video'
-      : 'Visionnement de la vidéo';
+  TranslatableString get visualizingVideo => TranslatableString(
+      en: 'Visualizing video', fr: 'Visionnement de la vidéo');
 
   // Save trial dialog texts
-  String get saveTrial =>
-      language == Language.en ? 'Save Trial' : 'Sauvegarder l\'essai';
+  TranslatableString get saveTrial =>
+      TranslatableString(en: 'Save Trial', fr: 'Sauvegarder l\'essai');
 
-  String get athleteName =>
-      language == Language.en ? 'Athlete name' : 'Nom de l\'athlète';
+  TranslatableString get athleteName =>
+      TranslatableString(en: 'Athlete name', fr: 'Nom de l\'athlète');
 
-  String get trialName =>
-      language == Language.en ? 'Trial name' : 'Nom de l\'essai';
+  TranslatableString get trialName =>
+      TranslatableString(en: 'Trial name', fr: 'Nom de l\'essai');
 
   // Show trial texts
-  String get flightTime => language == Language.en ? 'Time' : 'Temps';
+  TranslatableString get flightTime =>
+      TranslatableString(en: 'Time', fr: 'Temps');
 
-  String get flightHeight => language == Language.en ? 'Height' : 'Hauteur';
+  TranslatableString get flightHeight =>
+      TranslatableString(en: 'Height', fr: 'Hauteur');
 
-  String get areYouSureDelete => language == Language.en
-      ? 'Do you really want to delete the video?'
-      : 'Voulez-vous vraiment supprimer la vidéo?';
+  TranslatableString get areYouSureDelete => TranslatableString(
+      en: 'Do you really want to delete the video?',
+      fr: 'Voulez-vous vraiment supprimer la vidéo?');
 
   // Misc texts
-  String get areYouSureQuit => language == Language.en
-      ? 'Do you really want to quit?'
-      : 'Voulez-vous vraiment quitter?';
+  TranslatableString get areYouSureQuit => TranslatableString(
+      en: 'Do you really want to quit?', fr: 'Voulez-vous vraiment quitter?');
 
-  String get youWillLoseYourProgress => language == Language.en
-      ? 'You will lose your progress.'
-      : 'Vous perdrez votre progression.';
+  TranslatableString get youWillLoseYourProgress => TranslatableString(
+      en: 'You will lose your progress.',
+      fr: 'Vous perdrez votre progression.');
 
   // The texts for the buttons
-  String get confirm => language == Language.en ? 'Confirm' : 'Confirmer';
+  TranslatableString get confirm =>
+      TranslatableString(en: 'Confirm', fr: 'Confirmer');
 
-  String get cancel => language == Language.en ? 'Cancel' : 'Annuler';
+  TranslatableString get cancel =>
+      TranslatableString(en: 'Cancel', fr: 'Annuler');
 
-  String get quit => language == Language.en ? 'Quit' : 'Quitter';
+  TranslatableString get quit => TranslatableString(en: 'Quit', fr: 'Quitter');
 
-  String get no => language == Language.en ? 'No' : 'Non';
+  TranslatableString get no => TranslatableString(en: 'No', fr: 'Non');
 
-  String get yes => language == Language.en ? 'Yes' : 'Oui';
+  TranslatableString get yes => TranslatableString(en: 'Yes', fr: 'Oui');
 
-  String get unclassified =>
-      language == Language.en ? 'Unclassified' : 'Non classés';
+  TranslatableString get unclassified =>
+      TranslatableString(en: 'Unclassified', fr: 'Non classés');
 }

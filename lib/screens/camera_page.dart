@@ -3,6 +3,7 @@ import 'package:camerawesome/pigeon.dart';
 import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/screens/playback_page.dart';
 import 'package:flight_time/widgets/main_drawer.dart';
+import 'package:flight_time/widgets/translatable_text.dart';
 import 'package:flutter/material.dart';
 
 class CameraPage extends StatelessWidget {
@@ -21,7 +22,8 @@ class CameraPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(TextManager.instance.recordingVideo)),
+      appBar:
+          AppBar(title: TranslatableText(TextManager.instance.recordingVideo)),
       drawer: MainDrawer(),
       body: CameraAwesomeBuilder.awesome(
         saveConfig: SaveConfig.video(

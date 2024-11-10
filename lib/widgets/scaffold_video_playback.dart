@@ -6,6 +6,7 @@ import 'package:flight_time/models/text_manager.dart';
 import 'package:flight_time/models/video_meta_data.dart';
 import 'package:flight_time/widgets/helpers.dart';
 import 'package:flight_time/widgets/save_trial_dialog.dart';
+import 'package:flight_time/widgets/translatable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_info/flutter_video_info.dart';
 import 'package:video_player/video_player.dart';
@@ -84,16 +85,17 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
         ? await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(TextManager.instance.areYouSureQuit),
-              content: Text(TextManager.instance.youWillLoseYourProgress),
+              title: TranslatableText(TextManager.instance.areYouSureQuit),
+              content: TranslatableText(
+                  TextManager.instance.youWillLoseYourProgress),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(TextManager.instance.cancel),
+                  child: TranslatableText(TextManager.instance.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(TextManager.instance.quit),
+                  child: TranslatableText(TextManager.instance.quit),
                 ),
               ],
             ),
@@ -153,7 +155,7 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
       onPopInvokedWithResult: (didPop, result) => _managePop(),
       child: Scaffold(
           appBar: AppBar(
-            title: Text(TextManager.instance.visualizingVideo),
+            title: TranslatableText(TextManager.instance.visualizingVideo),
             elevation: 0,
             leading: IconButton(
                 onPressed: () => _areYouSureDialog(context),
@@ -230,11 +232,20 @@ class _FightTime extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${TextManager.instance.flightTime}: ',
-                style: textStyle,
+              Row(
+                children: [
+                  TranslatableText(TextManager.instance.flightTime,
+                      style: textStyle),
+                  Text(': ', style: textStyle),
+                ],
               ),
-              Text('${TextManager.instance.flightHeight}: ', style: textStyle),
+              Row(
+                children: [
+                  TranslatableText(TextManager.instance.flightHeight,
+                      style: textStyle),
+                  Text(': ', style: textStyle),
+                ],
+              ),
             ],
           ),
           Column(
