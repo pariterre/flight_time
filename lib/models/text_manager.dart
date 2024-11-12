@@ -61,6 +61,21 @@ class TextManager {
   TranslatableString get visualizingVideo => TranslatableString(
       en: 'Visualizing video', fr: 'Visionnement de la vidéo');
 
+  TranslatableString get fpsWarningTitle => TranslatableString(
+      en: 'Frame rate on Android', fr: 'Fréquence d\'images sur Android');
+
+  TranslatableString get fpsWarningDetails => TranslatableString(
+        en: 'It is not possible to automatically obtain the acquisition '
+            'frequency of the video on Android. If the video reacts too slowly '
+            'or too quickly using the image by image navigation buttons, you '
+            'can change the acquisition frequency at the top right.',
+        fr: 'Il n\'est pas possible d\'obtenir automatiquement la fréquence '
+            'd\'acquisition de la vidéo sur Android. Si la vidéo réagit trop '
+            'lentement ou trop rapidement en utilisant les boutons de navigation '
+            'image par image, vous pouvez changer la fréquence d\'acquisition en '
+            'haut à droite.',
+      );
+
   // Save trial dialog texts
   TranslatableString get saveTrial =>
       TranslatableString(en: 'Save Trial', fr: 'Sauvegarder l\'essai');

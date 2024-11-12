@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flight_time/models/athletes.dart';
@@ -9,7 +10,53 @@ import 'package:flight_time/widgets/save_trial_dialog.dart';
 import 'package:flight_time/widgets/translatable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_info/flutter_video_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
+
+enum FpsOptions {
+  fps30,
+  fps60,
+  fps120,
+  fps240,
+  ;
+
+  double get value {
+    switch (this) {
+      case FpsOptions.fps30:
+        return 30.0;
+      case FpsOptions.fps60:
+        return 60.0;
+      case FpsOptions.fps120:
+        return 120.0;
+      case FpsOptions.fps240:
+        return 240.0;
+    }
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case FpsOptions.fps30:
+        return '30';
+      case FpsOptions.fps60:
+        return '60';
+      case FpsOptions.fps120:
+        return '120';
+      case FpsOptions.fps240:
+        return '240';
+    }
+  }
+}
+
+class _VideoPlaybackWatcher {
+  Duration start;
+  Duration end;
+
+  FpsOptions fps;
+
+  _VideoPlaybackWatcher(
+      {required this.start, required this.end, required this.fps});
+}
 
 class ScaffoldVideoPlayback extends StatefulWidget {
   const ScaffoldVideoPlayback({
@@ -42,12 +89,62 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
 
   late final _videoPlaybackWatcher = _VideoPlaybackWatcher(
       start: _metaData?.timeJumpStarts ?? Duration.zero,
-      end: _metaData?.timeJumpEnds ?? widget.controller.value.duration);
+      end: _metaData?.timeJumpEnds ?? widget.controller.value.duration,
+      fps: FpsOptions.fps30);
+
+  final _videoPlaybackWatcherCompleter = Completer<void>();
 
   @override
   void initState() {
     widget.controller.seekTo(_videoPlaybackWatcher.start);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final preferences = await SharedPreferences.getInstance();
+      final fps = preferences.getDouble('fps') ?? FpsOptions.fps30.value;
+      _videoPlaybackWatcher.fps = FpsOptions.values.firstWhere(
+          (element) => element.value == fps,
+          orElse: () => FpsOptions.fps30);
+      _videoPlaybackWatcherCompleter.complete();
+      setState(() {});
+    });
+    _showWarningMessage();
     super.initState();
+  }
+
+  Future<void> _showWarningMessage() async {
+    final preferences = await SharedPreferences.getInstance();
+    final showWarning = preferences.getBool('showFpsWarning') ?? true;
+    if (!showWarning) return;
+
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await showDialog(
+        context: context,
+        builder: (context) => PopScope(
+          onPopInvokedWithResult: (didPop, result) {
+            preferences.setBool('showFpsWarning', false);
+          },
+          child: AlertDialog(
+            title: TranslatableText(TextManager.instance.fpsWarningTitle),
+            content: TranslatableText(TextManager.instance.fpsWarningDetails),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (context.mounted) Navigator.of(context).pop();
+                },
+                child: TranslatableText(TextManager.instance.confirm),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _onChangedFps(FpsOptions fps) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setDouble('fps', fps.value);
+    _videoPlaybackWatcher.fps = fps;
+    setState(() {});
   }
 
   Future<void> _onSaveVideo() async {
@@ -197,6 +294,20 @@ class _ScaffoldVideoPlaybackState extends State<ScaffoldVideoPlayback> {
                 top: 24,
                 child: _FightTime(videoPlaybackWatcher: _videoPlaybackWatcher),
               ),
+              Positioned(
+                right: 24,
+                top: 24,
+                child: FutureBuilder(
+                    future: _videoPlaybackWatcherCompleter.future,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return Container();
+                      }
+                      return _FpsSelector(
+                          initialValue: _videoPlaybackWatcher.fps,
+                          onFpsChanged: _onChangedFps);
+                    }),
+              ),
             ],
           )),
     );
@@ -211,6 +322,14 @@ class _FightTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fligthTimeDuration = fligthTime(
+        timeJumpStarts: _videoPlaybackWatcher.start,
+        timeJumpEnds: _videoPlaybackWatcher.end);
+    final fligthTimeText =
+        '${(fligthTimeDuration.inMilliseconds / 1000).toStringAsFixed(3)} s';
+    final fligthHeightText =
+        '${(flightHeight(fligthTime: fligthTimeDuration) * 100).toStringAsFixed(1)} cm';
+
     final textStyle = mainTextStyle.copyWith(
         color: Theme.of(context)
             .elevatedButtonTheme
@@ -252,14 +371,8 @@ class _FightTime extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '${(fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end).inMilliseconds / 1000).toStringAsFixed(3)} s',
-                style: textStyle,
-              ),
-              Text(
-                '${(flightHeight(fligthTime: fligthTime(timeJumpStarts: _videoPlaybackWatcher.start, timeJumpEnds: _videoPlaybackWatcher.end)) * 100).toStringAsFixed(1)} cm',
-                style: textStyle,
-              ),
+              Text(fligthTimeText, style: textStyle),
+              Text(fligthHeightText, style: textStyle),
             ],
           ),
         ],
@@ -268,11 +381,101 @@ class _FightTime extends StatelessWidget {
   }
 }
 
-class _VideoPlaybackWatcher {
-  Duration start;
-  Duration end;
+class _FpsSelector extends StatefulWidget {
+  const _FpsSelector({required this.initialValue, required this.onFpsChanged});
 
-  _VideoPlaybackWatcher({required this.start, required this.end});
+  final FpsOptions initialValue;
+  final Function(FpsOptions) onFpsChanged;
+
+  @override
+  State<_FpsSelector> createState() => _FpsSelectorState();
+}
+
+class _FpsSelectorState extends State<_FpsSelector> {
+  bool _isExpanded = false;
+  late FpsOptions _selectedFps = widget.initialValue;
+
+  void _onFpsChanged(FpsOptions fps) {
+    _selectedFps = fps;
+    widget.onFpsChanged(_selectedFps);
+    _isExpanded = false;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = mainTextStyle.copyWith(
+        color: Theme.of(context)
+            .elevatedButtonTheme
+            .style!
+            .foregroundColor!
+            .resolve({}));
+
+    final backgroundColor = Theme.of(context)
+        .elevatedButtonTheme
+        .style!
+        .backgroundColor!
+        .resolve({})!.withOpacity(0.7);
+
+    final width = 110.0;
+    final height = 45.0;
+
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          child: Container(
+            width: width,
+            height: height,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: _isExpanded
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12))
+                  : BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('FPS: ${_selectedFps.toString()}', style: textStyle),
+                Icon(
+                  _isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white,
+                )
+              ],
+            ),
+          ),
+        ),
+        if (_isExpanded) Container(height: MediaQuery.of(context).size.height),
+        if (_isExpanded)
+          Positioned(
+            left: 0,
+            top: height,
+            child: Container(
+              width: width,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12)),
+              ),
+              child: Column(
+                children: FpsOptions.values
+                    .map((e) => GestureDetector(
+                        onTap: () => _onFpsChanged(e),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text('FPS: ${e.toString()}', style: textStyle),
+                        )))
+                    .toList(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class _VideoPlaybackSlider extends StatefulWidget {
@@ -322,15 +525,11 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
   }
 
   bool _isChanging = false;
-  Future<void> _setPlayingValue(double value) async {
-    if (_isChanging) return;
-    _isChanging = true;
-
-    await _updateVideoFrame(value);
-
+  Future<void> _setPlayingValue(double value, {bool force = false}) async {
+    if (value < 0 || value > 1) return;
     _playbackMarker = value;
-    _isChanging = false;
     setState(() {});
+    _updateVideoFrame(value, force: force);
   }
 
   void _updatePlaybackMarkerFromPlaying() {
@@ -340,12 +539,10 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     }
   }
 
-  Future<void> _onUpdateRanges(RangeValues values) async {
+  Future<void> _onUpdateRanges(RangeValues values, {bool force = false}) async {
     _focusOnFirst = _ranges.start != values.start;
-    await _updateVideoFrame(_focusOnFirst ? values.start : values.end);
-    widget.onUpdateRanges();
     _ranges = values;
-
+    widget.onUpdateRanges();
     widget.watcher.start = Duration(
         milliseconds: (values.start *
                 widget.videoController.value.duration.inMilliseconds)
@@ -355,14 +552,26 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
             (values.end * widget.videoController.value.duration.inMilliseconds)
                 .toInt());
     setState(() {});
+
+    _updateVideoFrame(_focusOnFirst ? values.start : values.end, force: force);
   }
 
-  Future<void> _updateVideoFrame(double value) async {
+  Future<void> _updateVideoFrame(double value, {bool force = false}) async {
+    if (_isChanging) {
+      if (!force) return;
+
+      while (_isChanging) {
+        await Future.delayed(Duration(milliseconds: 10));
+      }
+    }
+
+    _isChanging = true;
     final duration = widget.videoController.value.duration;
     final position =
         Duration(milliseconds: (value * duration.inMilliseconds).toInt());
     await widget.videoController.seekTo(position);
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(Duration(milliseconds: 125));
+    _isChanging = false;
   }
 
   @override
@@ -379,6 +588,7 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
               RangeSlider(
                 values: _ranges,
                 onChanged: _onUpdateRanges,
+                onChangeEnd: (value) => _onUpdateRanges(value, force: true),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3 * padding),
@@ -406,20 +616,25 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                       children: [
                         _MarkerButton(
                           symbol: '<',
-                          onTap: () =>
-                              _setPlayingValue(_playbackMarker - 0.001),
+                          onTap: () => _setPlayingValue(
+                              _playbackMarker - (1 / widget.watcher.fps.value)),
                         ),
                         SizedBox(width: padding),
                         _PlayButton(
-                            isPlaying: !_isChanging &&
-                                widget.videoController.value.isPlaying,
-                            onPause: widget.onPause,
-                            onPlay: widget.onPlay),
+                            isPlaying: widget.videoController.value.isPlaying,
+                            onPause: () {
+                              widget.onPause();
+                              setState(() {});
+                            },
+                            onPlay: () {
+                              widget.onPlay();
+                              setState(() {});
+                            }),
                         SizedBox(width: padding),
                         _MarkerButton(
                           symbol: '>',
-                          onTap: () =>
-                              _setPlayingValue(_playbackMarker + 0.001),
+                          onTap: () => _setPlayingValue(
+                              _playbackMarker + (1 / widget.watcher.fps.value)),
                         ),
                       ],
                     ),
@@ -444,7 +659,8 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
               ),
               Slider(
                 value: _playbackMarker,
-                onChanged: (value) => _setPlayingValue(value),
+                onChanged: _setPlayingValue,
+                onChangeEnd: (value) => _setPlayingValue(value, force: true),
               ),
             ],
           ),
