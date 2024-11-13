@@ -540,6 +540,8 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
   }
 
   Future<void> _onUpdateRanges(RangeValues values, {bool force = false}) async {
+    if (_ranges.start == values.start && _ranges.end == values.end) return;
+
     _focusOnFirst = _ranges.start != values.start;
     _ranges = values;
     widget.onUpdateRanges();
@@ -553,7 +555,7 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
                 .toInt());
     setState(() {});
 
-    _updateVideoFrame(_focusOnFirst ? values.start : values.end, force: force);
+    _setPlayingValue(_focusOnFirst ? values.start : values.end, force: force);
   }
 
   Future<void> _updateVideoFrame(double value, {bool force = false}) async {
@@ -570,7 +572,7 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     final position =
         Duration(milliseconds: (value * duration.inMilliseconds).toInt());
     await widget.videoController.seekTo(position);
-    await Future.delayed(Duration(milliseconds: 125));
+    //await Future.delayed(Duration(milliseconds: 125));
     _isChanging = false;
   }
 

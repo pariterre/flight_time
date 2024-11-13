@@ -32,9 +32,7 @@ class CameraPage extends StatelessWidget {
         progressIndicator: WaitingScreen(),
         saveConfig: SaveConfig.video(
             videoOptions: VideoOptions(
-                // TODO Test if fps can be anything on iOS
-                enableAudio: false,
-                ios: CupertinoVideoOptions(fps: 300))),
+                enableAudio: false, ios: CupertinoVideoOptions(fps: 300))),
         sensorConfig:
             SensorConfig.single(sensor: Sensor.position(SensorPosition.back)),
         onMediaCaptureEvent: (mediaRecording) =>

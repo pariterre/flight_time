@@ -53,7 +53,7 @@ class TextManager {
 
   // The Recording related texts
   TranslatableString get recordingVideo =>
-      TranslatableString(en: 'Video recording', fr: 'Enregistrement video');
+      TranslatableString(en: 'Video recording', fr: 'Enregistrement vidéo');
 
   TranslatableString get preparingTrial => TranslatableString(
       en: 'Preparing the video', fr: 'Préparation de la vidéo');
@@ -66,14 +66,14 @@ class TextManager {
 
   TranslatableString get fpsWarningDetails => TranslatableString(
         en: 'It is not possible to automatically obtain the acquisition '
-            'frequency of the video on Android. If the video reacts too slowly '
-            'or too quickly using the image by image navigation buttons, you '
-            'can change the acquisition frequency at the top right.',
+            'frequency of the video. If the video reacts too slowly '
+            'or too quickly using the frame by frame (< and >) navigation buttons, you '
+            'can change the acquisition frequency at the top right of this page.',
         fr: 'Il n\'est pas possible d\'obtenir automatiquement la fréquence '
-            'd\'acquisition de la vidéo sur Android. Si la vidéo réagit trop '
+            'd\'acquisition de la vidéo. Si la vidéo réagit trop '
             'lentement ou trop rapidement en utilisant les boutons de navigation '
-            'image par image, vous pouvez changer la fréquence d\'acquisition en '
-            'haut à droite.',
+            'image par image (< et >), vous pouvez changer la fréquence d\'acquisition en '
+            'haut à droite de cette page.',
       );
 
   // Save trial dialog texts
