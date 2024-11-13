@@ -82,4 +82,4 @@ If you don't have the `storeFile`, you must request it from the project owner.
 
 ### iOS
 
-    flutter build ios --release
+    flutter build ipa
