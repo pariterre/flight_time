@@ -51,6 +51,18 @@ To generate the icons, run:
 
     Nothing special to do.
 
+## Generate splash screen
+
+### Android
+
+Currently not setup
+
+### iOS
+
+Run the following command: 
+
+    dart run flutter_native_splash:create --path=flutter_native_splash.yaml
+
 ## Building the app
 
 ### Android
