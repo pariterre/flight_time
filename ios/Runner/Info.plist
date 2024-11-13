@@ -28,7 +28,11 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Filming the athlete jumping</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Enregistrement de l'audio durant l'enregistrement vidéo</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIRequiresFullScreen</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
