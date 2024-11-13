@@ -572,7 +572,11 @@ class _VideoPlaybackSliderState extends State<_VideoPlaybackSlider> {
     final position =
         Duration(milliseconds: (value * duration.inMilliseconds).toInt());
     await widget.videoController.seekTo(position);
-    //await Future.delayed(Duration(milliseconds: 125));
+
+    // On Android it helps to wait a bit before setting the playback state
+    if (Platform.isAndroid) {
+      await Future.delayed(Duration(milliseconds: 125));
+    }
     _isChanging = false;
   }
 

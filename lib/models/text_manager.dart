@@ -61,8 +61,8 @@ class TextManager {
   TranslatableString get visualizingVideo => TranslatableString(
       en: 'Visualizing video', fr: 'Visionnement de la vidéo');
 
-  TranslatableString get fpsWarningTitle => TranslatableString(
-      en: 'Frame rate on Android', fr: 'Fréquence d\'images sur Android');
+  TranslatableString get fpsWarningTitle =>
+      TranslatableString(en: 'Frame rate', fr: 'Fréquence d\'images');
 
   TranslatableString get fpsWarningDetails => TranslatableString(
         en: 'It is not possible to automatically obtain the acquisition '
