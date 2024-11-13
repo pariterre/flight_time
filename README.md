@@ -31,7 +31,11 @@ Add these on ios/Runner/Info.plist:
 <key>NSCameraUsageDescription</key>
 <string>Your own description</string>
 
+<key>NSMicrophoneUsageDescription</key>
+<string>To enable microphone access when recording video</string>
 
+<key>UIRequiresFullScreen</key>
+<true/>
 
 ## Generate icons
 
