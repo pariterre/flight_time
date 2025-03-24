@@ -344,7 +344,7 @@ class _FightTime extends StatelessWidget {
             .elevatedButtonTheme
             .style!
             .backgroundColor!
-            .resolve({})!.withOpacity(0.7),
+            .resolve({})!.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -415,7 +415,7 @@ class _FpsSelectorState extends State<_FpsSelector> {
         .elevatedButtonTheme
         .style!
         .backgroundColor!
-        .resolve({})!.withOpacity(0.7);
+        .resolve({})!.withValues(alpha: 0.7);
 
     final width = 110.0;
     final height = 45.0;

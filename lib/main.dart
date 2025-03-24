@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
             style: IconButton.styleFrom(
                 foregroundColor: white,
                 backgroundColor: Colors.transparent,
-                disabledBackgroundColor: whiteBlue.withOpacity(0.2))),
+                disabledBackgroundColor: whiteBlue.withValues(alpha: 0.2))),
         drawerTheme: DrawerThemeData(backgroundColor: white),
       ),
       initialRoute: CameraPage.routeName,
