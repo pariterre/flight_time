@@ -1,19 +1,6 @@
 # flight_time
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Calculateur de temps de vol vous permet de faire le suivi de performance de vos athlètes en les filmant alors qu'ils réalisent un saut. L'application vous permet de marquer le début et la fin du saut et calcule automatiquement le temps de vol associé. Il est possible de conserver les vidéos sur votre appareil pour les regarder par la suite avec l'athlète ou comparer la technique avec un enregistrement préalable, permettant de montrer l'amélioration (ou la détérioration!) de celle ou celui-ci
 
 ## Prepare the project
 
