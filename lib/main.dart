@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
                 disabledBackgroundColor: whiteBlue.withValues(alpha: 0.2))),
         drawerTheme: DrawerThemeData(backgroundColor: white),
       ),
-      initialRoute: CameraPage.routeName,
+      initialRoute: AthletesNavigationPage.routeName,
       routes: {
         CameraPage.routeName: (context) => const CameraPage(),
         PlaybackPage.routeName: (context) => const PlaybackPage(),
