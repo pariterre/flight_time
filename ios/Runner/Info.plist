@@ -34,6 +34,8 @@
 	<string>Enregistrement de la position lors de l&apos;enregistrement vidéo</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIRequiresFullScreen</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
