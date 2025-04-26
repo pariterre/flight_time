@@ -16,7 +16,7 @@ The words of which the initial letter is capitalized have meanings defined under
 
 For the purposes of this Privacy Policy:
 
-- __Application__ refers to Flight Time, the software program provided by the Company.
+- __Application__ refers to Calculateur de temps de vol, the software program provided by the Company.
 - __Company__ (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Pariterre.
 - __Country__ refers to: Quebec
 - __Device__ means any device that can access the Service such as a computer, a cellphone or a digital tablet.
