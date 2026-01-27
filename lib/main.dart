@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
         primaryColor: Color.fromRGBO(0x00, 0x1f, 0x3b, 1),
-        appBarTheme: AppBarTheme(color: darkBlue, foregroundColor: white),
+        appBarTheme:
+            AppBarTheme(backgroundColor: darkBlue, foregroundColor: white),
         sliderTheme:
             SliderThemeData(thumbColor: orange, activeTrackColor: orange),
         elevatedButtonTheme: ElevatedButtonThemeData(
